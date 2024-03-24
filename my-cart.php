@@ -64,7 +64,7 @@ if(isset($_POST['ordersubmit'])) {
                 }
 
                 // Insert the order into the orders table with productName
-                mysqli_query($con, "INSERT INTO orders(userId, productId, productName, quantity) VALUES('" . $_SESSION['id'] . "','$pid','$productName','$qty')");
+                mysqli_query($con, "INSERT INTO orders(userId, productId, productName, quantity, orderStatus) VALUES('" . $_SESSION['id'] . "','$pid','$productName','$qty', 'in process')");
                 header('location: payment-method.php');
             } else {
                 // If available quantity is less than purchased quantity, show an error
@@ -196,6 +196,7 @@ if(!empty($_SESSION['cart'])){
 		<table class="table table-bordered">
 			<thead>
 				<tr>
+					<th class="cart-select item">Select</th>
 					<th class="cart-romove item">Remove</th>
 					<th class="cart-description item">Image</th>
 					<th class="cart-product-name item">Product Name</th>
@@ -239,8 +240,9 @@ if(!empty($_SESSION['cart'])){
 				array_push($pdtid,$row['id']);
 //print_r($_SESSION['pid'])=$pdtid;exit;
 	?>
-
+				
 				<tr>
+					<td class="cart-select item"><input type="checkbox" name="selected_items[]" value="<?php echo htmlentities($row['id']);?>" /></td>
 					<td class="romove-item"><input type="checkbox" name="remove_code[]" value="<?php echo htmlentities($row['id']);?>" /></td>
 					<td class="cart-image">
 						<a class="entry-thumbnail" href="detail.html">
@@ -279,7 +281,7 @@ $num=mysqli_num_rows($rt);
 
 			              </div>
 		            </td>
-					<td class="cart-product-sub-total"><span class="cart-sub-total-price"><?php echo "₱"." ".$row['productPrice']; ?>.00</span></td>
+					<td class="cart-product-sub-total"><span class="cart-sub-total-price"><?php echo "₱"." ".$row['productPrice']; ?></span></td>
 <td class="cart-product-sub-total"><span class="cart-sub-total-price"><?php echo "₱"." ".$row['shippingCharge']; ?>.00</span></td>
 
 					<td class="cart-product-grand-total"><span class="cart-grand-total-price"><?php echo ($_SESSION['cart'][$row['id']]['quantity']*$row['productPrice']+$row['shippingCharge']); ?>.00</span></td>
@@ -355,6 +357,7 @@ while($row=mysqli_fetch_array($query))
 <div class="col-md-4 col-sm-12 cart-shopping-total">
 	<table class="table table-bordered">
 		<thead>
+
 			<tr>
 				<th>
 
@@ -368,7 +371,7 @@ while($row=mysqli_fetch_array($query))
 				<tr>
 					<td>
 						<div class="cart-checkout-btn pull-right">
-							<button type="submit" name="ordersubmit" class="btn btn-primary">PROCEED TO CHEKOUT</button>
+									<button type="submit" name="ordersubmit" class="btn btn-primary" onclick="return validateCheckout()">PROCEED TO CHECKOUT</button>  
 
 						</div>
 					</td>
@@ -419,6 +422,24 @@ echo "Your shopping Cart is empty";
 		   $('.show-theme-options').delay(2000).trigger('click');
 		});
 	</script>
+	<script type="text/javascript">
+    function validateCheckout() {
+        var checkboxes = document.getElementsByName('selected_items[]');
+        var checked = false;
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                checked = true;
+                break;
+            }
+        }
+        if (!checked) {
+            alert("Please select at least one item to proceed to checkout.");
+            return false;
+        }
+        return true;
+    }
+</script>
+
 	<!-- For demo purposes – can be removed on production : End -->
 </body>
 </html>

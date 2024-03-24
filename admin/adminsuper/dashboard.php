@@ -112,25 +112,26 @@ else{
             </div>
             <?php
 if ($query) {
-    $st = 'Delivered';
-    $totalSaleQuery = mysqli_query($con, "SELECT SUM(orders.quantity * products.productPrice + products.shippingCharge) AS totalSale FROM orders JOIN users ON orders.userId = users.id JOIN products ON products.id = orders.productId WHERE orders.orderStatus = '$st'");
-    
-    // Check if there are results
-    if ($totalSaleQuery) {
-        $totalSaleRow = mysqli_fetch_assoc($totalSaleQuery);
-        $totalSale = $totalSaleRow['totalSale'];
-    } else {
-        $totalSale = 0; 
-    }
+  $st = 'Delivered';
+  $totalSaleQuery = mysqli_query($con, "SELECT SUM(orders.quantity * products.productPrice + products.shippingCharge) AS totalSale FROM orders JOIN users ON orders.userId = users.id JOIN products ON products.id = orders.productId WHERE orders.orderStatus = '$st'");
+  
+  // Check if there are results
+  if ($totalSaleQuery) {
+      $totalSaleRow = mysqli_fetch_assoc($totalSaleQuery);
+      $totalSale = $totalSaleRow['totalSale'];
+      
+      // Format the total sale as a decimal
+      $totalSale = number_format($totalSale, 2); // 2 decimal places
+  } else {
+      $totalSale = 0; 
+  }
 } else {
-    $totalSale = 0; 
+  $totalSale = 0; 
 }
 ?>
-<?php 
-$totalSale = '00';
-?>
 
-            <h1 class="totalall">₱<?php echo htmlentities($totalSale); ?>.00</h1>
+
+            <h1 class="totalall">₱<?php echo htmlentities($totalSale); ?></h1>
           </div>
 
         </div>

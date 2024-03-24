@@ -2,128 +2,147 @@
 session_start();
 
 include_once 'include/config.php';
-if(strlen($_SESSION['alogin'])==0)
-  { 
-header('location:index.php');
-}
-else{
-$oid=intval($_GET['oid']);
-if(isset($_POST['submit2'])){
-$status=$_POST['status'];
-$remark=$_POST['remark'];//space char
+if(strlen($_SESSION['alogin'])==0) { 
+    header('location:index.php');
+} else {
+    $oid=intval($_GET['oid']);
+    if(isset($_POST['submit2'])) {
+        $status=$_POST['status'];
+        $remark=$_POST['remark'];//space char
 
-$query=mysqli_query($con,"insert into ordertrackhistory(orderId,status,remark) values('$oid','$status','$remark')");
-$sql=mysqli_query($con,"update orders set orderStatus='$status' where id='$oid'");
-echo "<script>alert('Order updated sucessfully...');</script>";
-//}
+        $query=mysqli_query($con,"insert into ordertrackhistory(orderId,status,remark) values('$oid','$status','$remark')");
+        $sql=mysqli_query($con,"update orders set orderStatus='$status' where id='$oid'");
+        echo "<script>alert('Order updated sucessfully...');</script>";
+    }
 }
+?>
 
- ?>
-<script language="javascript" type="text/javascript">
-function f2()
-{
-window.close();
-}ser
-function f3()
-{
-window.print(); 
-}
-</script>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<title>Update Compliant</title>
-<link href="style.css" rel="stylesheet" type="text/css" />
-<link href="anuj.css" rel="stylesheet" type="text/css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Compliant</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom CSS can be added here */
+        /* Custom CSS for your PHP page */
+
+/* Update Order section */
+.container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #5a6268;
+}
+
+/* Order details section */
+.row {
+    margin-bottom: 10px;
+}
+
+.col p {
+    margin-bottom: 5px;
+}
+
+.col p b {
+    font-weight: bold;
+}
+
+    </style>
 </head>
 <body>
 
-<div style="margin-left:50px;">
- <form name="updateticket" id="updateticket" method="post"> 
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
-
-    <tr height="50">
-      <td colspan="2" class="fontkink2" style="padding-left:0px;"><div class="fontpink2"> <b>Update Order !</b></div></td>
-      
-    </tr>
-    <tr height="30">
-      <td  class="fontkink1"><b>order Id:</b></td>
-      <td  class="fontkink"><?php echo $oid;?></td>
-    </tr>
-    <?php 
-$ret = mysqli_query($con,"SELECT * FROM ordertrackhistory WHERE orderId='$oid'");
-     while($row=mysqli_fetch_array($ret))
-      {
-     ?>
-		
-    
-    
-      <tr height="20">
-      <td class="fontkink1" ><b>At Date:</b></td>
-      <td  class="fontkink"><?php echo $row['postingDate'];?></td>
-    </tr>
-     <tr height="20">
-      <td  class="fontkink1"><b>Status:</b></td>
-      <td  class="fontkink"><?php echo $row['status'];?></td>
-    </tr>
-     <tr height="20">
-      <td  class="fontkink1"><b>Remark:</b></td>
-      <td  class="fontkink"><?php echo $row['remark'];?></td>
-    </tr>
-
-   
-    <tr>
-      <td colspan="2"><hr /></td>
-    </tr>
-   <?php } ?>
-   <?php 
-$st='Delivered';
-   $rt = mysqli_query($con,"SELECT * FROM orders WHERE id='$oid'");
-     while($num=mysqli_fetch_array($rt))
-     {
-     $currrentSt=$num['orderStatus'];
-   }
-     if($st==$currrentSt)
-     { ?>
-   <tr><td colspan="2"><b>
-      Product Delivered </b></td>
-   <?php }else  {
-      ?>
-   
-    <tr height="50">
-      <td class="fontkink1">Status: </td>
-      <td  class="fontkink"><span class="fontkink1" >
-        <select name="status" class="fontkink" required="required" >
-          <option value="">Select Status</option>
-                 <option value="in Process">In Process</option>
-                  <option value="Delivered">Delivered</option>
-        </select>
-        </span></td>
-    </tr>
-
-     <tr style=''>
-      <td class="fontkink1" >Remark:</td>
-      <td class="fontkink" align="justify" ><span class="fontkink">
-        <textarea cols="50" rows="7" name="remark"  required="required" ></textarea>
-        </span></td>
-    </tr>
-    <tr>
-      <td class="fontkink1">&nbsp;</td>
-      <td  >&nbsp;</td>
-    </tr>
-    <tr>
-      <td class="fontkink">       </td>
-      <td  class="fontkink"> <input type="submit" name="submit2"  value="update"   size="40" style="cursor: pointer;" /> &nbsp;&nbsp;   
-      <input name="Submit2" type="submit" class="txtbox4" value="Close this Window " onClick="return f2();" style="cursor: pointer;"  /></td>
-    </tr>
-<?php } ?>
-</table>
- </form>
+<div class="container mt-5">
+    <form name="updateticket" id="updateticket" method="post"> 
+        <div class="row">
+            <div class="col">
+                <h3 class="font-weight-bold">Update Order</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="form-group">
+                    <label for="orderId">Order Id:</label>
+                    <input type="text" class="form-control" id="orderId" value="<?php echo $oid;?>" readonly>
+                </div>
+            </div>
+        </div>
+        <?php 
+        $ret = mysqli_query($con,"SELECT * FROM ordertrackhistory WHERE orderId='$oid'");
+        while($row=mysqli_fetch_array($ret)) {
+        ?>
+        <div class="row">
+            <div class="col">
+                <p><b>At Date:</b> <?php echo $row['postingDate'];?></p>
+                <p><b>Status:</b> <?php echo $row['status'];?></p>
+                <p><b>Remark:</b> <?php echo $row['remark'];?></p>
+            </div>
+        </div>
+        <?php } ?>
+        <?php 
+        $st='Delivered';
+        $rt = mysqli_query($con,"SELECT * FROM orders WHERE id='$oid'");
+        while($num=mysqli_fetch_array($rt)) {
+            $currrentSt=$num['orderStatus'];
+        }
+        if($st==$currrentSt) { ?>
+            <div class="row">
+                <div class="col">
+                    <p><b>Product Delivered</b></p>
+                </div>
+            </div>
+        <?php } else { ?>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="status">Status:</label>
+                        <select class="form-control" id="status" name="status" required>
+                            <option value="">Select Status</option>
+                            <option value="in Process">In Process</option>
+                            <option value="Delivered">Delivered</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="remark">Remark:</label>
+                        <textarea class="form-control" id="remark" name="remark" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" name="submit2" class="btn btn-primary">Update</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.close();">Close this Window</button>
+                </div>
+            </div>
+        <?php } ?>
+    </form>
 </div>
 
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
-<?php } ?>
-
-     

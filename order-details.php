@@ -136,7 +136,8 @@ while($row=mysqli_fetch_array($query))
 					<td class="cart-product-sub-total"><?php echo $price=$row['pprice']; ?>  </td>
 					<td class="cart-product-grand-total"><?php echo $qty*$price;?></td>
 					<td class="cart-product-sub-total"><?php echo $row['paym']; ?>  </td>
-					<td class="cart-product-sub-total"><?php echo $row['odate']; ?>  </td>
+					<td class="cart-product-sub-total"><?php echo date('g:i a', strtotime($row['odate'])); ?></td>
+
 
 					<td>
  <a href="javascript:void(0);" onClick="popUpWindow('track-order.php?oid=<?php echo htmlentities($row['orderid']);?>');" title="Track order">

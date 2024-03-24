@@ -1,55 +1,65 @@
 <?php
 session_start();
 error_reporting(0);
+date_default_timezone_set('Asia/Manila');
 include('includes/config.php');
 
+// Check if the action is to add a product to the cart
 if (isset($_GET['action']) && $_GET['action'] == "add") {
     $id = intval($_GET['id']);
-    if (strlen($_SESSION['login']) == 0) {
-        // Display alert for not signed in
-        echo "<script>alert('You need to sign in first!')</script>";
-        // Redirect to login page
-        echo "<script type='text/javascript'>document.location ='login.php';</script>";
-        exit; // Terminate script execution after redirection
+
+    // Check if the user is logged in
+    if (empty($_SESSION['login'])) {
+        // Redirect to the login page with a message
+        header('Location: login.php?message=signin');
+        exit;
     } else {
-        if (isset($_SESSION['cart'][$id])) {
-            $_SESSION['cart'][$id]['quantity']++;
-        } else {
-            $sql_p = "SELECT * FROM products WHERE id={$id}";
-            $query_p = mysqli_query($con, $sql_p);
-            if (mysqli_num_rows($query_p) != 0) {
-                $row_p = mysqli_fetch_array($query_p);
-                $_SESSION['cart'][$row_p['id']] = array("quantity" => 1, "price" => $row_p['productPrice']);
-				// After adding the product to the session cart
-// Insert data into the addtocart table
-$user_id = $_SESSION['id']; // Assuming you have a user_id in your session
+        // Check if the product ID is valid
+        $sql_p = "SELECT * FROM products WHERE id = $id";
+        $query_p = mysqli_query($con, $sql_p);
 
-// Get the product details
-$product_id = $row_p['id']; // Assuming $row_p contains product details // Assuming the quantity is always 1 when adding to the cart
-$product_name = $row_p['productName'];
-$quantity = 1;
-$product_price = $row_p['productPrice'];
-$added_at = date('Y-m-d H:i:s'); // Get the current date and time
+        if (mysqli_num_rows($query_p) != 0) {
+            // Fetch product details
+            $row_p = mysqli_fetch_array($query_p);
+            $product_name = $row_p['productName'];
+            $product_price = $row_p['productPrice'];
 
-// Prepare the SQL query
-$sql_insert = "INSERT INTO addtocart (user_id, product_id, product_name, quantity, product_price, added_at) VALUES ('$user_id', '$product_id', '$product_name', '$quantity', '$product_price', '$added_at')";
-
-// Execute the query
-if(mysqli_query($con, $sql_insert)) {
-    // Query executed successfully, you can perform further actions if needed
-} else {
-    // Handle the error if the query fails
-    echo "Error: " . mysqli_error($con);
-}
+            // Add the product to the session cart
+            if (isset($_SESSION['cart'][$id])) {
+                $_SESSION['cart'][$id]['quantity']++;
             } else {
-                $message = "Product ID is invalid";
+                $_SESSION['cart'][$id] = array("quantity" => 1, "price" => $product_price);
             }
+
+            // Insert data into the addtocart table
+            $user_id = $_SESSION['id'];
+            $quantity = 1;
+            $added_at = date('Y-m-d H:i:s');
+
+            $sql_insert = "INSERT INTO addtocart (userId, productId, product_name, quantity, product_price, added_at)
+                           VALUES ('$user_id', '$id', '$product_name', '$quantity', '$product_price', '$added_at')";
+
+            // Execute the query
+            if(mysqli_query($con, $sql_insert)) {
+                // Redirect to the cart page with a success message
+				echo "<script>alert('Added Cart successfully!')</script>";
+                header('Location: my-cart.php?message=added');
+                exit;
+            } else {
+                // Handle database insertion error
+                echo "Error: " . mysqli_error($con);
+                exit;
+            }
+        } else {
+            // Product ID is invalid
+            $message = "Product ID is invalid";
         }
-        // Display alert and redirect after adding the product to the cart
-        echo "<script>alert('Product has been added to the cart')</script>";
-        echo "<script type='text/javascript'> document.location ='my-cart.php'; </script>";
     }
+
+	
 }
+
+
 
 
 ?>
@@ -261,9 +271,9 @@ while ($row=mysqli_fetch_array($ret))
 			<div class="description"></div>
 
 			<div class="product-price">
-				<span class="price">
-					₱<?php echo htmlentities($row['productPrice']);?>			</span>
-										     <span class="price-before-discount">₱<?php echo htmlentities($row['productPriceBeforeDiscount']);?>	</span>
+			<span class="price">₱ <?php echo number_format($row['productPrice'], 2); ?></span>
+<span class="price-before-discount">₱ <?php echo number_format($row['productPriceBeforeDiscount'], 2); ?></span>
+
 
 			</div><!-- /.product-price -->
 
@@ -321,9 +331,9 @@ while ($row=mysqli_fetch_array($ret))
 			<div class="description"></div>
 
 			<div class="product-price">
-				<span class="price">
-					₱ <?php echo htmlentities($row['productPrice']);?>			</span>
-										     <span class="price-before-discount">₱<?php echo htmlentities($row['productPriceBeforeDiscount']);?></span>
+			<span class="price">₱ <?php echo number_format($row['productPrice'], 2); ?></span>
+<span class="price-before-discount">₱ <?php echo number_format($row['productPriceBeforeDiscount'], 2); ?></span>
+
 
 			</div><!-- /.product-price -->
 
@@ -381,9 +391,9 @@ while ($row=mysqli_fetch_array($ret))
 			<div class="description"></div>
 
 			<div class="product-price">
-				<span class="price">
-					₱<?php echo htmlentities($row['productPrice']);?>			</span>
-										     <span class="price-before-discount">₱<?php echo htmlentities($row['productPriceBeforeDiscount']);?></span>
+			<span class="price">₱ <?php echo number_format($row['productPrice'], 2); ?></span>
+<span class="price-before-discount">₱ <?php echo number_format($row['productPriceBeforeDiscount'], 2); ?></span>
+
 
 			</div>
 
@@ -443,9 +453,9 @@ while ($row=mysqli_fetch_array($ret))
 			<div class="description"></div>
 
 			<div class="product-price">
-				<span class="price">
-					₱ <?php echo htmlentities($row['productPrice']);?>			</span>
-										     <span class="price-before-discount">₱<?php echo htmlentities($row['productPriceBeforeDiscount']);?></span>
+			<span class="price">₱ <?php echo number_format($row['productPrice'], 2); ?></span>
+<span class="price-before-discount">₱ <?php echo number_format($row['productPriceBeforeDiscount'], 2); ?></span>
+
 
 			</div>
 
@@ -496,9 +506,9 @@ while ($row=mysqli_fetch_array($ret))
 			<div class="description"></div>
 
 			<div class="product-price">
-				<span class="price">
-				₱<?php echo htmlentities($row['productPrice']);?>			</span>
-										     <span class="price-before-discount">₱<?php echo htmlentities($row['productPriceBeforeDiscount']);?></span>
+			<span class="price">₱ <?php echo number_format($row['productPrice'], 2); ?></span>
+<span class="price-before-discount">₱ <?php echo number_format($row['productPriceBeforeDiscount'], 2); ?></span>
+
 
 			</div>
 
@@ -564,9 +574,10 @@ while ($row=mysqli_fetch_array($ret))
 											<h3 class="name"><a href="product-details.php?pid=<?php echo htmlentities($row['id']);?>"><?php echo htmlentities($row['productName']);?></a></h3>
 											<div class="rating rateit-small"></div>
 											<div class="product-price">
-												<span class="price">
-													₱ <?php echo htmlentities($row['productPrice']);?>
-												</span>
+											<span class="price">
+    ₱ <?php echo number_format($row['productPrice'], 2); ?>
+</span>
+
 
 											</div><!-- /.product-price -->
 										<?php if($row['productAvailability']=='In Stock'){?>

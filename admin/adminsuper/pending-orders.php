@@ -63,7 +63,7 @@ popUpWin = open(URLStr,'popUpWin', 'toolbar=no,location=no,directories=no,status
 									<br />
 
 							
-								<table cellpadding="0" cellspacing="0" border="0" class="" >
+								<table cellpadding="0" cellspacing="0" border="0" class="datatable-1 table-bordered table-striped	 display table-responsive" >
 									<thead>
 										<tr>
 											<th>No.</th>

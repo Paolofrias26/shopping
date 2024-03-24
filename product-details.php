@@ -177,9 +177,10 @@ while($row=mysqli_fetch_array($sql))
                         <div class="rating rateit-small"></div>
 
                         <div class="product-price">
-                            <span class="price">₱ <?php echo htmlentities($rws['productPrice']); ?>.00</span>
-                            <span class="price-before-discount">₱<?php echo htmlentities($rws['productPriceBeforeDiscount']); ?></span>
-                        </div><!-- /.product-price -->
+    <span class="price">₱ <?php echo number_format($rws['productPrice'], 2); ?></span>
+    <span class="price-before-discount">₱<?php echo number_format($rws['productPriceBeforeDiscount'], 2); ?></span>
+</div><!-- /.product-price -->
+
 
                         <div class="cart clearfix animate-effect">
                             <div class="action">
@@ -376,10 +377,12 @@ $num=mysqli_num_rows($rt);
 
 
 									<div class="col-sm-6">
-										<div class="price-box">
-											<span class="price">₱ <?php echo htmlentities($row['productPrice']);?></span>
-											<span class="price-strike">₱<?php echo htmlentities($row['productPriceBeforeDiscount']);?></span>
-										</div>
+									<div class="price-box">
+    <span class="price">₱ <?php echo number_format($row['productPrice'], 2); ?></span>
+	<br>
+    <span class="price-strike">₱ <?php echo number_format($row['productPriceBeforeDiscount'], 2); ?></span>
+</div>
+
 									</div>
 
 
@@ -622,10 +625,8 @@ while($rw=mysqli_fetch_array($qry))
 			<div class="description"></div>
 
 			<div class="product-price">
-				<span class="price">
-					₱<?php echo htmlentities($rw['productPrice']);?>			</span>
-										     <span class="price-before-discount">₱
-										     <?php echo htmlentities($rw['productPriceBeforeDiscount']);?></span>
+			<span class="price">₱ <?php echo number_format($rw['productPrice'], 2); ?></span>
+<span class="price-before-discount">₱ <?php echo number_format($rw['productPriceBeforeDiscount'], 2); ?></span>
 
 			</div><!-- /.product-price -->
 

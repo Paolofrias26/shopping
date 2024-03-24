@@ -13,8 +13,8 @@ else{
 		$baddress=$_POST['billingaddress'];
 		$bstate=$_POST['bilingstate'];
 		$bcity=$_POST['billingcity'];
-		$bpincode=$_POST['barangay'];
-		$query=mysqli_query($con,"update users set billingAddress='$baddress',billingState='$bstate',billingCity='$bcity',barangay='$bpincode' where id='".$_SESSION['id']."'");
+		$bbarangay=$_POST['barangay'];
+		$query=mysqli_query($con,"update users set billingAddress='$baddress',billingState='$bstate',billingCity='$bcity',barangay='$bbarangay' where id='".$_SESSION['id']."'");
 		if($query)
 		{
 echo "<script>alert('Billing Address has been updated');</script>";
@@ -28,8 +28,8 @@ echo "<script>alert('Billing Address has been updated');</script>";
 		$saddress=$_POST['shippingaddress'];
 		$sstate=$_POST['shippingstate'];
 		$scity=$_POST['shippingcity'];
-		$spincode=$_POST['shippingpincode'];
-		$query=mysqli_query($con,"update users set shippingAddress='$saddress',shippingState='$sstate',shippingCity='$scity',shippingPincode='$spincode' where id='".$_SESSION['id']."'");
+		$sbarangay=$_POST['barangay'];
+		$query=mysqli_query($con,"update users set shippingAddress='$saddress',shippingState='$sstate',shippingCity='$scity',barangay='$sbarangay' where id='".$_SESSION['id']."'");
 		if($query)
 		{
 echo "<script>alert('Shipping Address has been updated');</script>";
@@ -158,7 +158,7 @@ while($row=mysqli_fetch_array($query))
 					    <input type="text" class="form-control unicase-form-control text-input" id="billingcity" name="billingcity" required="required" value="<?php echo $row['billingCity'];?>" >
 					  </div>
  <div class="form-group">
-					    <label class="info-title" for="Billing Pincode">Barangay <span>*</span></label>
+					    <label class="info-title" for="barangay">Barangay <span>*</span></label>
 					    <input type="text" class="form-control unicase-form-control text-input" id="barangay" name="barangay" required="required" value="<?php echo $row['barangay'];?>" >
 					  </div>
 
