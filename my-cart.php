@@ -1,111 +1,117 @@
 <?php
+// Start the session and suppress error reporting
 session_start();
 error_reporting(0);
+
+// Include configuration file
 include('includes/config.php');
-if(strlen($_SESSION['login'])==0)
-    {
-header('location:login.php');
-}
-else{
 
-if(isset($_POST['submit'])){
-		if(!empty($_SESSION['cart'])){
-		foreach($_POST['quantity'] as $key => $val){
-			if($val==0){
-				unset($_SESSION['cart'][$key]);
-			}else{
-				$_SESSION['cart'][$key]['quantity']=$val;
-
-			}
-		}
-			echo "<script>alert('Your Cart hasbeen Updated');</script>";
-		}
-	}
-// Code for Remove a Product from Cart
-if(isset($_POST['remove_code']))
-	{
-
-if(!empty($_SESSION['cart'])){
-		foreach($_POST['remove_code'] as $key){
-
-				unset($_SESSION['cart'][$key]);
-		}
-			echo "<script>alert('Your Cart has been Updated');</script>";
-	}
-}
-// code for insert product in order table
-
-
-if(isset($_POST['ordersubmit'])) {
-    if(strlen($_SESSION['login']) == 0) {
-        header('location: login.php');
-    } else {
-        $quantity = $_POST['quantity'];
-        $pdtid = $_SESSION['pid'];
-        $value = array_combine($pdtid, $quantity);
-
-        foreach($value as $pid => $qty) {
-            // Fetch available quantity and product name from the database
-            $fetchProductQuery = mysqli_query($con, "SELECT productName, quantity FROM products WHERE id='$pid'");
-            $productRow = mysqli_fetch_assoc($fetchProductQuery);
-            $productName = $productRow['productName'];
-            $availableQuantity = $productRow['quantity'];
-
-            // Check if available quantity is greater than or equal to purchased quantity
-            if ($availableQuantity >= $qty) {
-                // Subtract purchased quantity from available quantity
-                $newQuantity = $availableQuantity - $qty;
-
-                // Update the quantity in the products table
-                $updateQuantityQuery = mysqli_query($con, "UPDATE products SET quantity='$newQuantity' WHERE id='$pid'");
-                if (!$updateQuantityQuery) {
-                    // Handle the error if the update fails
-                    echo "<script>alert('Error updating quantity in the database.');</script>";
+// Check if the user is logged in
+if (strlen($_SESSION['login']) == 0) {
+    // Redirect to login page if not logged in
+    header('location:login.php');
+} else {
+    // Update cart quantity upon submission
+    if (isset($_POST['submit'])) {
+        // Check if cart is not empty
+        if (!empty($_SESSION['cart'])) {
+            foreach ($_POST['quantity'] as $key => $val) {
+                // Remove item from cart if quantity is 0
+                if ($val == 0) {
+                    unset($_SESSION['cart'][$key]);
+                } else {
+                    // Update quantity
+                    $_SESSION['cart'][$key]['quantity'] = $val;
                 }
-
-                // Insert the order into the orders table with productName
-                mysqli_query($con, "INSERT INTO orders(userId, productId, productName, quantity, orderStatus) VALUES('" . $_SESSION['id'] . "','$pid','$productName','$qty', 'in process')");
-                header('location: payment-method.php');
-            } else {
-                // If available quantity is less than purchased quantity, show an error
-                echo "<script>alert('Insufficient quantity available for product ID: $pid.');</script>";
             }
+            // Display message
+            echo "<script>alert('Your Cart has been Updated');</script>";
+        }
+    }
+
+   // Remove product from cart
+// Remove product from cart and database
+if (isset($_POST['remove_item'])) {
+    $item_id = $_POST['remove_item'];
+    // Check if cart is not empty
+	echo "<script>
+	var confirmRemove = confirm('Are you sure you want to remove this item to cart?');
+	if (confirmRemove) {
+		// If user confirms, proceed with removal
+		window.location.href = 'remove_item.php?item_id=$item_id';
+	} else {
+		// If user cancels, do nothing
+	}
+ </script>";
+}
+
+
+
+
+
+   // Insert product into order table
+   if (isset($_POST['ordersubmit'])) {
+    // Check if the user is logged in
+    if (strlen($_SESSION['login']) == 0) {
+        // Redirect to login page if not logged in
+        header('location:login.php');
+        exit; // Stop further execution
+    } else {
+        // Check if any products are selected for ordering
+        if (!empty($_POST['remove_code'])) {
+            // Iterate over the selected products
+            foreach ($_POST['remove_code'] as $productId) {
+                // Get the quantity of the selected product
+                $quantity = $_POST['quantity'][$productId];
+
+                // Insert order into orders table
+                $insertOrderQuery = mysqli_query($con, "INSERT INTO orders(userId, productId, quantity, orderStatus) VALUES('" . $_SESSION['id'] . "','$productId','$quantity', 'in process')");
+                
+                if (!$insertOrderQuery) {
+                    // Display error if insertion fails
+                    echo "<script>alert('Error placing the order. Please try again.');</script>";
+                    // You might want to handle the error more gracefully
+                }
+            }
+            // Redirect to payment method page after successfully placing the order
+            header('location: payment-method.php');
+            exit; // Stop further execution
+        } else {
+            // Display error if no products are selected
+            echo "<script>alert('Please select at least one product to proceed to checkout.');</script>";
+            // You might want to handle the error more gracefully
+        }
+	}
+   }
+
+    // Update billing address
+    if (isset($_POST['update'])) {
+        $baddress = $_POST['billingaddress'];
+        $bstate = $_POST['bilingstate'];
+        $bcity = $_POST['billingcity'];
+        $bbarangay = $_POST['barangay'];
+        $query = mysqli_query($con, "update users set billingAddress='$baddress',billingState='$bstate',billingCity='$bcity',barangay='$bbarangay' where id='".$_SESSION['id']."'");
+        if ($query) {
+            // Display success message
+            echo "<script>alert('Billing Address has been updated');</script>";
+        }
+    }
+
+    // Update shipping address
+    if (isset($_POST['shipupdate'])) {
+        $saddress = $_POST['shippingaddress'];
+        $sstate = $_POST['shippingstate'];
+        $scity = $_POST['shippingcity'];
+        $sbarangay = $_POST['barangay'];
+        $query = mysqli_query($con, "update users set shippingAddress='$saddress',shippingState='$sstate',shippingCity='$scity',barangay='$sbarangay' where id='".$_SESSION['id']."'");
+        if ($query) {
+            // Display success message
+            echo "<script>alert('Shipping Address has been updated');</script>";
         }
     }
 }
-}
-
-
-// code for billing address updation
-	if(isset($_POST['update']))
-	{
-		$baddress=$_POST['billingaddress'];
-		$bstate=$_POST['bilingstate'];
-		$bcity=$_POST['billingcity'];
-		$bbarangay=$_POST['barangay'];
-		$query=mysqli_query($con,"update users set billingAddress='$baddress',billingState='$bstate',billingCity='$bcity',barangay='$bbarangay' where id='".$_SESSION['id']."'");
-		if($query)
-		{
-echo "<script>alert('Billing Address has been updated');</script>";
-		}
-	}
-
-
-// code for Shipping address updation
-	if(isset($_POST['shipupdate']))
-	{
-		$saddress=$_POST['shippingaddress'];
-		$sstate=$_POST['shippingstate'];
-		$scity=$_POST['shippingcity'];
-		$sbarangay=$_POST['barangay'];
-		$query=mysqli_query($con,"update users set shippingAddress='$saddress',shippingState='$sstate',shippingCity='$scity',barangay='$sbarangay' where id='".$_SESSION['id']."'");
-		if($query)
-		{
-echo "<script>alert('Shipping Address has been updated');</script>";
-		}
-	}
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -191,110 +197,102 @@ echo "<script>alert('Shipping Address has been updated');</script>";
 	<div class="table-responsive">
 <form name="cart" method="post">
 <?php
-if(!empty($_SESSION['cart'])){
-	?>
+$ret=mysqli_query($con,"select products.shippingCharge as shippingCharge,products.productName as pname,products.productName as proid,products.productImage1 as pimage,products.productPrice as pprice,addtocart.productId as pid,addtocart.quantity as quantity,addtocart.id as wid from addtocart join products on products.id=addtocart.productId where addtocart.userId='".$_SESSION['id']."'");  
+$num=mysqli_num_rows($ret);
+	if($num>0)
+	{ 
+		?>
 		<table class="table table-bordered">
-			<thead>
-				<tr>
-					<th class="cart-select item">Select</th>
-					<th class="cart-romove item">Remove</th>
-					<th class="cart-description item">Image</th>
-					<th class="cart-product-name item">Product Name</th>
+				<thead>
+					<tr>
+						<th class="cart-select item">Select</th>
+						<th class="cart-romove item">Remove</th>
+						<th class="cart-description item">Image</th>
+						<th class="cart-product-name item">Product Name</th>
 
-					<th class="cart-qty item">Quantity</th>
-					<th class="cart-sub-total item">Price Per unit</th>
-					<th class="cart-sub-total item">Shipping Charge</th>
-					<th class="cart-total last-item">Grandtotal</th>
-				</tr>
-			</thead><!-- /thead -->
-			<tfoot>
-				<tr>
-					<td colspan="7">
-						<div class="shopping-cart-btn">
-							<span class="">
-								<a href="index.php" class="btn btn-upper btn-primary outer-left-xs">Continue Shopping</a>
-								<input type="submit" name="submit" value="Update shopping cart" class="btn btn-upper btn-primary pull-right outer-right-xs">
-							</span>
-						</div><!-- /.shopping-cart-btn -->
-					</td>
-				</tr>
-			</tfoot>
-			<tbody>
- <?php
- $pdtid=array();
-    $sql = "SELECT * FROM products WHERE id IN(";
-			foreach($_SESSION['cart'] as $id => $value){
-			$sql .=$id. ",";
-			}
-			$sql=substr($sql,0,-1) . ") ORDER BY id ASC";
-			$query = mysqli_query($con,$sql);
-			$totalprice=0;
-			$totalqunty=0;
-			if(!empty($query)){
-			while($row = mysqli_fetch_array($query)){
-				$quantity=$_SESSION['cart'][$row['id']]['quantity'];
-				$subtotal= $_SESSION['cart'][$row['id']]['quantity']*$row['productPrice']+$row['shippingCharge'];
-				$totalprice += $subtotal;
-				$_SESSION['qnty']=$totalqunty+=$quantity;
+						<th class="cart-qty item">Quantity</th>
+						<th class="cart-sub-total item">Price Per unit</th>
+						<th class="cart-sub-total item">Shipping Charge</th>
+						<th class="cart-total last-item">Grandtotal</th>
+					</tr>
+				</thead><!-- /thead -->
+				<tfoot>
+					<tr>
+						<td colspan="7">
+							<div class="shopping-cart-btn">
+								<span class="">
+									<a href="index.php" class="btn btn-upper btn-primary outer-left-xs">Continue Shopping</a>
+									<input type="submit" name="submit" value="Update shopping cart" class="btn btn-upper btn-primary pull-right outer-right-xs">
+								</span>
+							</div><!-- /.shopping-cart-btn -->
+						</td>
+					</tr>
+				</tfoot>
+		<?php
+while ($row=mysqli_fetch_array($ret)) {
 
-				array_push($pdtid,$row['id']);
-//print_r($_SESSION['pid'])=$pdtid;exit;
-	?>
-				
-				<tr>
-					<td class="cart-select item"><input type="checkbox" name="selected_items[]" value="<?php echo htmlentities($row['id']);?>" /></td>
-					<td class="romove-item"><input type="checkbox" name="remove_code[]" value="<?php echo htmlentities($row['id']);?>" /></td>
-					<td class="cart-image">
-						<a class="entry-thumbnail" href="detail.html">
-						    <img src="admin/productimages/<?php echo $row['id'];?>/<?php echo $row['productImage1'];?>" alt="" width="114" height="146">
-						</a>
-					</td>
-					<td class="cart-product-name-info">
-						<h4 class='cart-product-description'><a href="product-details.php?pid=<?php echo htmlentities($pd=$row['id']);?>" ><?php echo $row['productName'];
-
-$_SESSION['sid']=$pd;
-						 ?></a></h4>
-						<div class="row">
-							<div class="col-sm-4">
-								<div class="rating rateit-small"></div>
-							</div>
-							<div class="col-sm-8">
-<?php $rt=mysqli_query($con,"select * from productreviews where productId='$pd'");
-$num=mysqli_num_rows($rt);
-{
 ?>
-								<div class="reviews">
-									( <?php echo htmlentities($num);?> Reviews )
+			
+			
+				<tbody>
+
+     
+					<tr>
+					<td class="cart-select item">
+					<input type="checkbox" 
+       name="selected_items[]" 
+       value="<?php echo htmlentities($row['wid']);?>" 
+       data-price="<?php echo htmlentities($row['pprice']); ?>" 
+       data-quantity="<?php echo htmlentities($row['quantity']); ?>" 
+       onchange="updateGrandTotal(); updateCheckoutButton();" />
+    </td>
+
+					<td class="romove-item"><button type="submit" name="remove_item" value="<?php echo htmlentities($row['wid']);?>" class="btn btn-danger btn-xs">Remove</button></td>
+
+						<td class="col-md-2"><img src="admin/productimages/<?php echo htmlentities($row['pid']);?>/<?php echo htmlentities($row['pimage']);?>" alt="<?php echo htmlentities($row['pname']);?>" width="60" height="100"></td>
+						<td class="cart-product-name-info">
+							<h4 class='cart-product-description'><a href="product-details.php?pid=<?php echo htmlentities($pd=$row['pid']);?>"><?php echo htmlentities($row['pname']);?></a></h4>
+							<div class="row">
+								<div class="col-sm-4">
+									<div class="rating rateit-small"></div>
 								</div>
-								<?php } ?>
+								<div class="col-sm-8">
+	<?php $rt=mysqli_query($con,"select * from productreviews where productId='$pd'");
+	$num=mysqli_num_rows($rt);
+	{
+	?>
+									<div class="reviews">
+										( <?php echo htmlentities($num);?> Reviews )
+									</div>
+									<?php } ?>
+								</div>
+							</div><!-- /.row -->
+
+						</td>
+						<td class="cart-product-quantity">
+							<div class="quant-input">
+									<div class="arrows">
+									<div class="arrow plus gradient"><span class="ir"><i class="icon fa fa-sort-asc"></i></span></div>
+									<div class="arrow minus gradient"><span class="ir"><i class="icon fa fa-sort-desc"></i></span></div>
+									</div>
+								<input type="text" value="<?php echo $row['quantity']?>">
+
 							</div>
-						</div><!-- /.row -->
+						</td>
+						<td class="cart-product-sub-total"><span class="cart-sub-total-price"><?php echo "₱"." ".$row['pprice']; ?></span></td>
+	<td class="cart-product-sub-total"><span class="cart-sub-total-price"><?php echo "₱"." ".$row['shippingCharge']; ?>.00</span></td>
 
-					</td>
-					<td class="cart-product-quantity">
-						<div class="quant-input">
-				                <div class="arrows">
-				                  <div class="arrow plus gradient"><span class="ir"><i class="icon fa fa-sort-asc"></i></span></div>
-				                  <div class="arrow minus gradient"><span class="ir"><i class="icon fa fa-sort-desc"></i></span></div>
-				                </div>
-				             <input type="text" value="<?php echo $_SESSION['cart'][$row['id']]['quantity']; ?>" name="quantity[<?php echo $row['id']; ?>]">
+						<td class="cart-product-grand-total"><span class="cart-grand-total-price"><?php echo ($row['quantity']*$row['pprice']+$row['shippingCharge']); ?>.00</span></td>
+					</tr>
 
-			              </div>
-		            </td>
-					<td class="cart-product-sub-total"><span class="cart-sub-total-price"><?php echo "₱"." ".$row['productPrice']; ?></span></td>
-<td class="cart-product-sub-total"><span class="cart-sub-total-price"><?php echo "₱"." ".$row['shippingCharge']; ?>.00</span></td>
+					<?php  }
+	$_SESSION['pid']=$pdtid;
+					?>
 
-					<td class="cart-product-grand-total"><span class="cart-grand-total-price"><?php echo ($_SESSION['cart'][$row['id']]['quantity']*$row['productPrice']+$row['shippingCharge']); ?>.00</span></td>
-				</tr>
+				</tbody><!-- /tbody -->
+			</table><!-- /table -->
 
-				<?php } }
-$_SESSION['pid']=$pdtid;
-				?>
-
-			</tbody><!-- /tbody -->
-		</table><!-- /table -->
-
-	</div>
+		</div>
 </div><!-- /.shopping-cart-table -->			<div class="col-md-4 col-sm-12 estimate-ship-tax">
 	<table class="table table-bordered">
 		<thead>
@@ -361,9 +359,11 @@ while($row=mysqli_fetch_array($query))
 			<tr>
 				<th>
 
-					<div class="cart-grand-total">
-						Grand Total<span class="inner-left-md"><?php echo $_SESSION['tp']="$totalprice". ".00"; ?></span>
-					</div>
+					<!-- Update the HTML for the grand total -->
+<div class="cart-grand-total" id="grandTotal">
+    Grand Total<span class="">₱0.00</span>
+</div>
+
 				</th>
 			</tr>
 		</thead><!-- /thead -->
@@ -371,7 +371,7 @@ while($row=mysqli_fetch_array($query))
 				<tr>
 					<td>
 						<div class="cart-checkout-btn pull-right">
-									<button type="submit" name="ordersubmit" class="btn btn-primary" onclick="return validateCheckout()">PROCEED TO CHECKOUT</button>  
+						<button type="submit" name="ordersubmit" class="btn btn-primary" id="checkoutBtn" onclick="return validateCheckout()" disabled>PROCEED TO CHECKOUT</button> 
 
 						</div>
 					</td>
@@ -390,7 +390,44 @@ echo "Your shopping Cart is empty";
 <?php include('includes/footer.php');?>
 
 	<script src="assets/js/jquery-1.11.1.min.js"></script>
+	<script>
+		<script>
+    // Function to calculate and update the grand total
+    function updateGrandTotal() {
+        // Initialize grand total variable
+        var grandTotal = 0;
 
+        // Iterate over the selected checkboxes
+        var checkboxes = document.getElementsByName('remove_code[]');
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                // Get the price and quantity of the selected item
+                var price = parseFloat(checkboxes[i].getAttribute('data-price'));
+                var quantity = parseInt(checkboxes[i].getAttribute('data-quantity'));
+
+                // Calculate subtotal for the selected item (price * quantity)
+                var subtotal = price * quantity;
+
+                // Add the subtotal to the grand total
+                grandTotal += subtotal;
+            }
+        }
+
+        // Update the grand total display
+        document.getElementById('grandTotal').innerHTML = 'Grand Total<span class="inner-left-md">₱' + grandTotal.toFixed(2) + '</span>';
+    }
+
+    // Attach event listener to checkboxes to update grand total when they change
+    var checkboxes = document.getElementsByName('remove_code[]');
+    for (var i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].addEventListener('change', updateGrandTotal);
+    }
+
+    // Update grand total initially
+    updateGrandTotal();
+</script>
+
+	</script>
 	<script src="assets/js/bootstrap.min.js"></script>
 
 	<script src="assets/js/bootstrap-hover-dropdown.min.js"></script>
@@ -406,39 +443,54 @@ echo "Your shopping Cart is empty";
 	<script src="assets/js/scripts.js"></script>
 
 	<!-- For demo purposes – can be removed on production -->
+	<script>
+		function updateCheckoutButton() {
+    var checkboxes = document.querySelectorAll('input[name="selected_items[]"]');
+    var checkoutBtn = document.getElementById('checkoutBtn');
+    var isChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+    checkoutBtn.disabled = !isChecked;
+}
+
+function updateGrandTotal() {
+    // Add your code to update the grand total based on selected items
+}
+
+function validateCheckout() {
+    var checkboxes = document.querySelectorAll('input[name="selected_items[]"]');
+    var checked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+    if (!checked) {
+        alert("Please select at least one item to proceed to checkout.");
+        return false;
+    }
+    return true;
+}
+
+	</script>
 
 	<script src="switchstylesheet/switchstylesheet.js"></script>
 
 	<script>
-		$(document).ready(function(){
-			$(".changecolor").switchstylesheet( { seperator:"color"} );
-			$('.show-theme-options').click(function(){
-				$(this).parent().toggleClass('open');
-				return false;
-			});
-		});
+	function updateGrandTotal() {
+    var checkboxes = document.querySelectorAll('input[name="selected_items[]"]:checked');
+    var total = 0;
+    checkboxes.forEach(function(checkbox) {
+        var price = parseFloat(checkbox.dataset.price);
+        var quantity = parseInt(checkbox.dataset.quantity);
+        total += price * quantity;
+    });
+    document.getElementById('grandTotal').innerText = 'Grand Total  ' + '   ₱' + total.toFixed(2); // Format as decimal
+}
 
-		$(window).bind("load", function() {
-		   $('.show-theme-options').delay(2000).trigger('click');
-		});
+
+function updateCheckoutButton() {
+    var checkboxes = document.querySelectorAll('input[name="selected_items[]"]');
+    var checkoutBtn = document.getElementById('checkoutBtn');
+    var isChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+    checkoutBtn.disabled = !isChecked;
+}
+
 	</script>
-	<script type="text/javascript">
-    function validateCheckout() {
-        var checkboxes = document.getElementsByName('selected_items[]');
-        var checked = false;
-        for (var i = 0; i < checkboxes.length; i++) {
-            if (checkboxes[i].checked) {
-                checked = true;
-                break;
-            }
-        }
-        if (!checked) {
-            alert("Please select at least one item to proceed to checkout.");
-            return false;
-        }
-        return true;
-    }
-</script>
+	
 
 	<!-- For demo purposes – can be removed on production : End -->
 </body>

@@ -8,16 +8,19 @@
         echo "<script type='text/javascript'>document.location ='login.php';</script>";
         exit; // Terminate script execution after redirection
     } else {
-		if(!empty($_SESSION['cart'])){
-		foreach($_POST['quantity'] as $key => $val){
-			if($val==0){
-				unset($_SESSION['cart'][$key]);
-			}else{
-				$_SESSION['cart'][$key]['quantity']=$val;
-			}
-		}
-		}
+	
 	}
+	$ret = mysqli_query($con, "SELECT products.shippingCharge as shippingCharge, 
+ products.productName as pname,
+ products.id as proid,
+ products.productImage1 as pimage,
+ products.productPrice as pprice,
+ addtocart.productId as pid,
+ addtocart.quantity as quantity,
+ addtocart.id as wid 
+FROM addtocart 
+JOIN products ON products.id = addtocart.productId 
+WHERE addtocart.userId = '".$_SESSION['id']."'");
 }
 ?>
 	<div class="main-header">
@@ -61,7 +64,8 @@ if(!empty($_SESSION['cart'])){
 					<span class="lbl">cart -</span>
 					<span class="total-price">
 						<span class="sign">₱</span>
-						<span class="value"><?php echo $_SESSION['tp']; ?></span>
+						<span class="value"><?php echo number_format($_SESSION['tp'], 2); ?></span>
+
 					</span>
 				</div>
 				<div class="basket">
@@ -74,20 +78,28 @@ if(!empty($_SESSION['cart'])){
 		<ul class="dropdown-menu">
 
 		 <?php
-    $sql = "SELECT * FROM products WHERE id IN(";
-			foreach($_SESSION['cart'] as $id => $value){
-			$sql .=$id. ",";
-			}
-			$sql=substr($sql,0,-1) . ") ORDER BY id ASC";
-			$query = mysqli_query($con,$sql);
-			$totalprice=0;
-			$totalqunty=0;
-			if(!empty($query)){
-			while($row = mysqli_fetch_array($query)){
-				$quantity=$_SESSION['cart'][$row['id']]['quantity'];
-				$subtotal= $_SESSION['cart'][$row['id']]['quantity']*$row['productPrice']+$row['shippingCharge'];
-				$totalprice += $subtotal;
-				$_SESSION['qnty']=$totalqunty+=$quantity;
+ $ret = mysqli_query($con, "SELECT products.shippingCharge as shippingCharge, 
+ products.productName as pname,
+ products.id as proid,
+ products.productImage1 as pimage,
+ products.productPrice as pprice,
+ addtocart.productId as pid,
+ addtocart.quantity as quantity,
+ addtocart.id as wid 
+FROM addtocart 
+JOIN products ON products.id = addtocart.productId 
+WHERE addtocart.userId = '".$_SESSION['id']."'");
+
+$totalprice = 0; // Initialize total price
+$totalqunty = 0; // Initialize total quantity
+
+if(mysqli_num_rows($ret) > 0) {
+while($row = mysqli_fetch_array($ret)) {
+// Calculate subtotal for each item and add to total price
+$subtotal = $row['pprice'] * $row['quantity'] + $row['shippingCharge'];
+$totalprice += $subtotal;
+// Add quantity to total quantity
+$totalqunty += $row['quantity'];
 
 	?>
 
@@ -97,13 +109,14 @@ if(!empty($_SESSION['cart'])){
 					<div class="row">
 						<div class="col-xs-4">
 							<div class="image">
-								<a href="product-details.php?pid=<?php echo $row['id'];?>"><img  src="admin/productimages/<?php echo $row['id'];?>/<?php echo $row['productImage1'];?>" width="35" height="50" alt=""></a>
+								<a href="product-details.php?pid=<?php echo $row['id'];?>"><img  src="admin/productimages/<?php echo $row['proid'];?>/<?php echo $row['pimage'];?>" width="35" height="50" alt=""></a>
 							</div>
 						</div>
 						<div class="col-xs-7">
 
-							<h3 class="name"><a href="product-details.php?pid=<?php echo $row['id'];?>"><?php echo $row['productName']; ?></a></h3>
-							<div class="price">₱<?php echo ($row['productPrice']+$row['shippingCharge']); ?>*<?php echo $_SESSION['cart'][$row['id']]['quantity']; ?></div>
+							<h3 class="name"><a href="product-details.php?pid=<?php echo $row['id'];?>"><?php echo $row['pname']; ?></a></h3>
+							<div class="price">₱<?php echo number_format(($row['pprice'] + $row['shippingCharge']), 2); ?>
+ X <?php echo $row['quantity']; ?></div>
 						</div>
 
 					</div>
@@ -116,7 +129,8 @@ if(!empty($_SESSION['cart'])){
 			<div class="clearfix cart-total">
 				<div class="pull-right">
 
-						<span class="text">Total :</span><span class='price'>₱<?php echo $_SESSION['tp']="$totalprice"?></span>
+				<span class='price'>₱<?php echo number_format($_SESSION['tp'] = $totalprice, 2); ?></span>
+
 
 				</div>
 
