@@ -21,6 +21,7 @@
 FROM addtocart 
 JOIN products ON products.id = addtocart.productId 
 WHERE addtocart.userId = '".$_SESSION['id']."'");
+
 }
 ?>
 	<div class="main-header">
@@ -55,16 +56,16 @@ WHERE addtocart.userId = '".$_SESSION['id']."'");
 				<div class="col-xs-12 col-sm-12 col-md-3 animate-dropdown top-cart-row">
 					<!-- ============================================================= SHOPPING CART DROPDOWN ============================================================= -->
 <?php
-if(!empty($_SESSION['cart'])){
+
 	?>
 	<div class="dropdown dropdown-cart">
 		<a href="#" class="dropdown-toggle lnk-cart" data-toggle="dropdown">
 			<div class="items-cart-inner">
 				<div class="total-price-basket">
-					<span class="lbl">cart -</span>
+					
 					<span class="total-price">
-						<span class="sign">₱</span>
-						<span class="value"><?php echo number_format($_SESSION['tp'], 2); ?></span>
+						
+						<span class="value">Cart Table</span>
 
 					</span>
 				</div>
@@ -114,7 +115,7 @@ $totalqunty += $row['quantity'];
 						</div>
 						<div class="col-xs-7">
 
-							<h3 class="name"><a href="product-details.php?pid=<?php echo $row['id'];?>"><?php echo $row['pname']; ?></a></h3>
+							<h3 class="name"><a href="product-details.php?pid=<?php echo $row['proid'];?>"><?php echo $row['pname']; ?></a></h3>
 							<div class="price">₱<?php echo number_format(($row['pprice'] + $row['shippingCharge']), 2); ?>
  X <?php echo $row['quantity']; ?></div>
 						</div>
@@ -122,7 +123,7 @@ $totalqunty += $row['quantity'];
 					</div>
 				</div><!-- /.cart-item -->
 
-				<?php } }?>
+				<?php } ?>
 				<div class="clearfix"></div>
 			<hr>
 

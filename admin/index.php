@@ -99,7 +99,14 @@ if(isset($_POST['submit']))
 						<div class="module-head">
 							<h3>Sign In</h3>
 						</div>
-						<span style="color:red;" ><?php echo htmlentities($_SESSION['errmsg']); ?><?php echo htmlentities($_SESSION['errmsg']="");?></span>
+						<?php if(isset($_SESSION['errmsg']) && !empty($_SESSION['errmsg'])): ?>
+    <div class="alert alert-danger" role="alert">
+        <?php echo htmlentities($_SESSION['errmsg']); ?>
+        <?php echo htmlentities($_SESSION['errmsg'] = ""); ?>
+    </div>
+<?php endif; ?>
+
+
 						<div class="module-body">
 							<div class="control-group">
 								<div class="controls row-fluid">

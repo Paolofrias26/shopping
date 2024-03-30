@@ -164,13 +164,12 @@ error:function (){}
 	<h4 class="">sign in</h4>
 	<p class="">Hello, Mag sign in para makakuha ng libreng voucher.</p>
 	<form class="register-form outer-top-xs" method="post">
-	<span style="color:red;" >
-<?php
-echo htmlentities($_SESSION['errmsg']);
-?>
-<?php
-echo htmlentities($_SESSION['errmsg']="");
-?>
+	<?php if(isset($_SESSION['errmsg']) && !empty($_SESSION['errmsg'])): ?>
+    <div class="alert alert-danger" role="alert">
+        <?php echo htmlentities($_SESSION['errmsg']); ?>
+        <?php echo htmlentities($_SESSION['errmsg'] = ""); ?>
+    </div>
+<?php endif; ?>
 	</span>
 		<div class="form-group">
 		    <label class="info-title" for="exampleInputEmail1">Email Address <span>*</span></label>

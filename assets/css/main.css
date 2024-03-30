@@ -4340,11 +4340,11 @@ a {
     margin-top: 20px;
   }
   .shopping-cart .estimate-ship-tax table thead tr th .estimate-title {
-    font-size: 16px !important;
+    font-size: 14px !important;
   }
   .shopping-cart .cart-shopping-total table thead tr th .cart-sub-total,
   .shopping-cart .cart-shopping-total table thead tr th .cart-grand-total {
-    font-size: 16px !important;
+    font-size: 14px !important;
   }
   .wrapper .box .wrapper-inner .container {
     width: auto !important;

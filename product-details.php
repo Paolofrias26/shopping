@@ -2,29 +2,52 @@
 session_start();
 error_reporting(0);
 include('includes/config.php');
-if(isset($_GET['action']) && $_GET['action']=="add"){
-	$id=intval($_GET['id']);
-	if (strlen($_SESSION['login']) == 0) {
-        // Display alert for not signed in
-        echo "<script>alert('You need to sign in first!')</script>";
-        // Redirect to login page
-        echo "<script type='text/javascript'>document.location ='login.php';</script>";
-        exit; // Terminate script execution after redirection
-    } else {	
-	if(isset($_SESSION['cart'][$id])){
-		$_SESSION['cart'][$id]['quantity']++;
-	}else{
-		$sql_p="SELECT * FROM products WHERE id={$id}";
-		$query_p=mysqli_query($con,$sql_p);
-		if(mysqli_num_rows($query_p)!=0){
-			$row_p=mysqli_fetch_array($query_p);
-			$_SESSION['cart'][$row_p['id']]=array("quantity" => 1, "price" => $row_p['productPrice']);
-					echo "<script>alert('Product has been added to the cart')</script>";
-		echo "<script type='text/javascript'> document.location ='my-cart.php'; </script>";
-		}else{
-			$message="Product ID is invalid";
-		}
+if (isset($_GET['action']) && $_GET['action'] == "add") {
+    $id = intval($_GET['id']);
+
+    // Check if the user is logged in
+    if (empty($_SESSION['login'])) {
+        // Redirect to the login page with a message
+        header('Location: login.php?message=signin');
+        exit;
+    } else {
+        // Check if the product ID is valid
+        $sql_p = "SELECT * FROM products WHERE id = $id";
+        $query_p = mysqli_query($con, $sql_p);
+
+        if (mysqli_num_rows($query_p) != 0) {
+            // Fetch product details
+            $row_p = mysqli_fetch_array($query_p);
+            $product_name = $row_p['productName'];
+            $product_price = $row_p['productPrice'];
+
+            // Add the product to the session cart
+            if (isset($_SESSION['cart'][$id])) {
+                $_SESSION['cart'][$id]['quantity']++;
+            } else {
+                $_SESSION['cart'][$id] = array("quantity" => 1, "price" => $product_price);
+            }
+			
+            // Insert data into the addtocart table
+            $user_id = $_SESSION['id'];
+            $quantity = 1;
+            $added_at = date('Y-m-d H:i:s');
+
+            $sql_insert = "INSERT INTO addtocart (userId, productId, product_name, quantity, product_price, added_at)
+                           VALUES ('$user_id', '$id', '$product_name', '$quantity', '$product_price', '$added_at')";
+			
+            // Execute the query
+            if(mysqli_query($con, $sql_insert)) {
+                // Redirect to the cart page with a success message
+				$_SESSION['success_message'] = 'Added to cart successfully!';
+                header('Location: my-cart.php?message=added');
+                exit;
+            } else {
+                // Handle database insertion error
+                echo "Error: " . mysqli_error($con);
+                exit;
 	}
+		}
 	}
 }
 $pid=intval($_GET['pid']);
@@ -420,7 +443,7 @@ $num=mysqli_num_rows($rt);
 								                  <div class="arrow plus gradient"><span class="ir"><i class="icon fa fa-sort-asc"></i></span></div>
 								                  <div class="arrow minus gradient"><span class="ir"><i class="icon fa fa-sort-desc"></i></span></div>
 								                </div>
-								                <input type="text" value="1">
+								                <input name="quantity" type="text" value="1">
 							              </div>
 							            </div>
 									</div>

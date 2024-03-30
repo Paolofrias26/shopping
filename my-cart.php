@@ -11,25 +11,27 @@ if (strlen($_SESSION['login']) == 0) {
     // Redirect to login page if not logged in
     header('location:login.php');
 } else {
-    // Update cart quantity upon submission
-    if (isset($_POST['submit'])) {
-        // Check if cart is not empty
-        if (!empty($_SESSION['cart'])) {
-            foreach ($_POST['quantity'] as $key => $val) {
-                // Remove item from cart if quantity is 0
-                if ($val == 0) {
-                    unset($_SESSION['cart'][$key]);
-                } else {
-                    // Update quantity
-                    $_SESSION['cart'][$key]['quantity'] = $val;
-                }
-            }
-            // Display message
-            echo "<script>alert('Your Cart has been Updated');</script>";
-        }
-    }
 
-   // Remove product from cart
+	if (isset($_SESSION['success_message'])) {
+		// Display the success message in an alert box
+		echo "<script>alert('" . $_SESSION['success_message'] . "')</script>";
+		
+		// Remove the session variable to prevent displaying the message again on page refresh
+		unset($_SESSION['success_message']);
+	}
+
+	
+	// Include configuration file
+	include('includes/config.php');
+
+	
+
+
+
+    // Update cart quantity upon submission
+  
+
+
 // Remove product from cart and database
 if (isset($_POST['remove_item'])) {
     $item_id = $_POST['remove_item'];
@@ -97,18 +99,8 @@ if (isset($_POST['remove_item'])) {
         }
     }
 
-    // Update shipping address
-    if (isset($_POST['shipupdate'])) {
-        $saddress = $_POST['shippingaddress'];
-        $sstate = $_POST['shippingstate'];
-        $scity = $_POST['shippingcity'];
-        $sbarangay = $_POST['barangay'];
-        $query = mysqli_query($con, "update users set shippingAddress='$saddress',shippingState='$sstate',shippingCity='$scity',barangay='$sbarangay' where id='".$_SESSION['id']."'");
-        if ($query) {
-            // Display success message
-            echo "<script>alert('Shipping Address has been updated');</script>";
-        }
-    }
+   
+    
 }
 ?>
 
@@ -195,6 +187,7 @@ if (isset($_POST['remove_item'])) {
 			<div class="shopping-cart">
 				<div class="col-md-12 col-sm-12 shopping-cart-table ">
 	<div class="table-responsive">
+	
 <form name="cart" method="post">
 <?php
 $ret=mysqli_query($con,"select products.shippingCharge as shippingCharge,products.productName as pname,products.productName as proid,products.productImage1 as pimage,products.productPrice as pprice,addtocart.productId as pid,addtocart.quantity as quantity,addtocart.id as wid from addtocart join products on products.id=addtocart.productId where addtocart.userId='".$_SESSION['id']."'");  
@@ -282,7 +275,7 @@ while ($row=mysqli_fetch_array($ret)) {
 						<td class="cart-product-sub-total"><span class="cart-sub-total-price"><?php echo "₱"." ".$row['pprice']; ?></span></td>
 	<td class="cart-product-sub-total"><span class="cart-sub-total-price"><?php echo "₱"." ".$row['shippingCharge']; ?>.00</span></td>
 
-						<td class="cart-product-grand-total"><span class="cart-grand-total-price"><?php echo ($row['quantity']*$row['pprice']+$row['shippingCharge']); ?>.00</span></td>
+						<td class="cart-product-grand-total"><span class="cart-grand-total-price"> ₱ <?php echo ($row['quantity']*$row['pprice']+$row['shippingCharge']); ?></span></td>
 					</tr>
 
 					<?php  }

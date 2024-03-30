@@ -42,7 +42,7 @@ if (isset($_GET['action']) && $_GET['action'] == "add") {
             // Execute the query
             if(mysqli_query($con, $sql_insert)) {
                 // Redirect to the cart page with a success message
-				echo "<script>alert('Added Cart successfully!')</script>";
+				$_SESSION['success_message'] = 'Added to cart successfully!';
                 header('Location: my-cart.php?message=added');
                 exit;
             } else {
