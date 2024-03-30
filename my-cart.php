@@ -12,39 +12,22 @@ if (strlen($_SESSION['login']) == 0) {
     header('location:login.php');
 } else {
 
-	if (isset($_SESSION['success_message'])) {
-		// Display the success message in an alert box
-		echo "<script>alert('" . $_SESSION['success_message'] . "')</script>";
-		
-		// Remove the session variable to prevent displaying the message again on page refresh
-		unset($_SESSION['success_message']);
-	}
-
-	
-	// Include configuration file
-	include('includes/config.php');
-
-	
-
-
-
-    // Update cart quantity upon submission
-  
 
 
 // Remove product from cart and database
 if (isset($_POST['remove_item'])) {
     $item_id = $_POST['remove_item'];
+    
     // Check if cart is not empty
-	echo "<script>
-	var confirmRemove = confirm('Are you sure you want to remove this item to cart?');
-	if (confirmRemove) {
-		// If user confirms, proceed with removal
-		window.location.href = 'remove_item.php?item_id=$item_id';
-	} else {
-		// If user cancels, do nothing
-	}
- </script>";
+    echo "<script>
+    var confirmRemove = confirm('Are you sure you want to remove this item from cart?');
+    if (confirmRemove) {
+        // If user confirms, proceed with removal
+        window.location.href = 'remove_item.php?item_id=$item_id';
+    } else {
+        // If user cancels, do nothing
+    }
+    </script>";
 }
 
 
@@ -53,38 +36,9 @@ if (isset($_POST['remove_item'])) {
 
    // Insert product into order table
    if (isset($_POST['ordersubmit'])) {
-    // Check if the user is logged in
-    if (strlen($_SESSION['login']) == 0) {
-        // Redirect to login page if not logged in
-        header('location:login.php');
-        exit; // Stop further execution
-    } else {
-        // Check if any products are selected for ordering
-        if (!empty($_POST['remove_code'])) {
-            // Iterate over the selected products
-            foreach ($_POST['remove_code'] as $productId) {
-                // Get the quantity of the selected product
-                $quantity = $_POST['quantity'][$productId];
-
-                // Insert order into orders table
-                $insertOrderQuery = mysqli_query($con, "INSERT INTO orders(userId, productId, quantity, orderStatus) VALUES('" . $_SESSION['id'] . "','$productId','$quantity', 'in process')");
-                
-                if (!$insertOrderQuery) {
-                    // Display error if insertion fails
-                    echo "<script>alert('Error placing the order. Please try again.');</script>";
-                    // You might want to handle the error more gracefully
-                }
-            }
-            // Redirect to payment method page after successfully placing the order
-            header('location: payment-method.php');
-            exit; // Stop further execution
-        } else {
-            // Display error if no products are selected
-            echo "<script>alert('Please select at least one product to proceed to checkout.');</script>";
-            // You might want to handle the error more gracefully
-        }
-	}
+	
    }
+    // Check if the user is logged in
 
     // Update billing address
     if (isset($_POST['update'])) {
@@ -99,9 +53,9 @@ if (isset($_POST['remove_item'])) {
         }
     }
 
-   
+}  
     
-}
+
 ?>
 
 
@@ -196,6 +150,8 @@ $num=mysqli_num_rows($ret);
 	{ 
 		?>
 		<table class="table table-bordered">
+
+	
 				<thead>
 					<tr>
 						<th class="cart-select item">Select</th>
@@ -272,10 +228,16 @@ while ($row=mysqli_fetch_array($ret)) {
 
 							</div>
 						</td>
-						<td class="cart-product-sub-total"><span class="cart-sub-total-price"><?php echo "₱"." ".$row['pprice']; ?></span></td>
-	<td class="cart-product-sub-total"><span class="cart-sub-total-price"><?php echo "₱"." ".$row['shippingCharge']; ?>.00</span></td>
+						<td class="cart-product-sub-total" style="padding: 0;">
+    <span class="cart-sub-total-price"><?php echo "₱"." ".$row['pprice']; ?></span>
+</td>
+<td class="cart-product-sub-total" style="padding: 0;">
+    <span class="cart-sub-total-price"><?php echo "₱"." ".$row['shippingCharge']; ?>.00</span>
+</td>
+<td class="cart-product-grand-total" style="padding: 0;">
+    <span class="cart-grand-total-price"> ₱ <?php echo ($row['quantity']*$row['pprice']+$row['shippingCharge']); ?></span>
+</td>
 
-						<td class="cart-product-grand-total"><span class="cart-grand-total-price"> ₱ <?php echo ($row['quantity']*$row['pprice']+$row['shippingCharge']); ?></span></td>
 					</tr>
 
 					<?php  }
@@ -444,9 +406,6 @@ echo "Your shopping Cart is empty";
     checkoutBtn.disabled = !isChecked;
 }
 
-function updateGrandTotal() {
-    // Add your code to update the grand total based on selected items
-}
 
 function validateCheckout() {
     var checkboxes = document.querySelectorAll('input[name="selected_items[]"]');

@@ -11,12 +11,14 @@ if (isset($_GET['item_id'])) {
     $delete_query = "DELETE FROM addtocart WHERE id = '$item_id'";
     $result = mysqli_query($con, $delete_query);
     if ($result) {
-        // Redirect back to the cart page
-        header('Location: my-cart.php');
-        exit();
+        // Set success message
+        $_SESSION['errmsg'] = "Item successfully removed from the cart";
     } else {
         // Display error message
-        echo "<script>alert('Error removing item from the cart.');</script>";
+        $_SESSION['errmsg'] = "Error removing item from the cart.";
     }
+    // Redirect back to the cart page
+    header('Location: my-cart.php');
+    exit();
 }
 ?>

@@ -10,19 +10,9 @@
     } else {
 	
 	}
-	$ret = mysqli_query($con, "SELECT products.shippingCharge as shippingCharge, 
- products.productName as pname,
- products.id as proid,
- products.productImage1 as pimage,
- products.productPrice as pprice,
- addtocart.productId as pid,
- addtocart.quantity as quantity,
- addtocart.id as wid 
-FROM addtocart 
-JOIN products ON products.id = addtocart.productId 
-WHERE addtocart.userId = '".$_SESSION['id']."'");
 
-}
+
+ }
 ?>
 	<div class="main-header">
 		<div class="container">
@@ -33,7 +23,7 @@ WHERE addtocart.userId = '".$_SESSION['id']."'");
 	<a href="index.php">
 
 		<div>
-			<img style="width: 50%;" src="assets/images/988logo.png" alt="">
+			<img style="width: 50%; margin-bottom: 15px;" src="assets/images/988logo.png" alt="">
 		</div>
 
 	</a>
@@ -55,9 +45,7 @@ WHERE addtocart.userId = '".$_SESSION['id']."'");
 
 				<div class="col-xs-12 col-sm-12 col-md-3 animate-dropdown top-cart-row">
 					<!-- ============================================================= SHOPPING CART DROPDOWN ============================================================= -->
-<?php
 
-	?>
 	<div class="dropdown dropdown-cart">
 		<a href="#" class="dropdown-toggle lnk-cart" data-toggle="dropdown">
 			<div class="items-cart-inner">
@@ -121,6 +109,8 @@ $totalqunty += $row['quantity'];
 						</div>
 
 					</div>
+					<hr class="my-4" style="border-top: 1px solid #ccc;">
+
 				</div><!-- /.cart-item -->
 
 				<?php } ?>
@@ -146,28 +136,7 @@ $totalqunty += $row['quantity'];
 	</div><!-- /.dropdown-cart -->
 <?php } else { ?>
 <div class="dropdown dropdown-cart">
-		<a href="#" class="dropdown-toggle lnk-cart" data-toggle="dropdown">
-			<div class="items-cart-inner">
-				<div class="total-price-basket">
-					<span class="lbl">Total -</span>
-					<span class="total-price">
-						<span class="sign">₱</span>
-						<span class="value">00.00</span>
-					</span>
-				</div>
-				<div class="basket">
-					<i style="color:white;" class="glyphicon glyphicon-pushpin"></i>
-				</div>
-				<div class="basket-item-count"><span class="count">0</span></div>
-
-		    </div>
-		</a>
-		<ul class="dropdown-menu">
-
-
-
-
-			<li>
+<li>
 				<div class="cart-item product-summary">
 					<div class="row">
 						<div class="col-xs-12">
@@ -193,7 +162,13 @@ $totalqunty += $row['quantity'];
 
 
 		</li>
-		</ul><!-- /.dropdown-menu-->
+		
+
+
+
+
+		
+	
 	</div>
 	<?php }?>
 

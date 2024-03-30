@@ -4,6 +4,8 @@ error_reporting(0);
 date_default_timezone_set('Asia/Manila');
 include('includes/config.php');
 
+
+
 // Check if the action is to add a product to the cart
 if (isset($_GET['action']) && $_GET['action'] == "add") {
     $id = intval($_GET['id']);
