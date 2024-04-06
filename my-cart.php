@@ -34,10 +34,37 @@ if (isset($_POST['remove_item'])) {
 
 
 
-   // Insert product into order table
-   if (isset($_POST['ordersubmit'])) {
-	
-   }
+if (isset($_POST['ordersubmit'])) {
+    // Fetch cart items
+    $cartQuery = mysqli_query($con, "SELECT * FROM addtocart WHERE userId = '".$_SESSION['id']."'");
+    
+    // Check if cart is not empty
+    if (mysqli_num_rows($cartQuery) > 0) {
+        while ($cartRow = mysqli_fetch_assoc($cartQuery)) {
+            $productId = $cartRow['productId'];
+            $quantity = $cartRow['quantity'];
+            
+            // Insert cart item into orders table
+            $insertOrderQuery = mysqli_query($con, "INSERT INTO orders (userId, productId, quantity, orderStatus, orderDate) VALUES ('".$_SESSION['id']."', '$productId', '$quantity', 'Pending', NOW())");
+            
+            // Remove the item from the cart
+            $removeFromCartQuery = mysqli_query($con, "DELETE FROM addtocart WHERE userId = '".$_SESSION['id']."' AND productId = '$productId'");
+            
+            if (!$insertOrderQuery || !$removeFromCartQuery) {
+                // Display error message
+                echo "<script>alert('Error: Unable to submit order. Please try again later.');</script>";
+                break;
+            }
+        }
+        
+        // Redirect to payment method page
+        header('location: payment-method.php');
+        exit();
+    } else {
+        // Display error message if cart is empty
+        echo "<script>alert('Your shopping cart is empty.');</script>";
+    }
+}
     // Check if the user is logged in
 
     // Update billing address
@@ -143,13 +170,21 @@ if (isset($_POST['remove_item'])) {
 	<div class="table-responsive">
 	
 <form name="cart" method="post">
+
 <?php
+if (isset($_SESSION['wishlist_cart_message'])) {
+	// Display the session message
+	echo '<div class="alert alert-success">' . $_SESSION['wishlist_cart_message'] . '</div>';
+	// Unset the session variable to clear the message
+	unset($_SESSION['wishlist_cart_message']);
+}
 $ret=mysqli_query($con,"select products.shippingCharge as shippingCharge,products.productName as pname,products.productName as proid,products.productImage1 as pimage,products.productPrice as pprice,addtocart.productId as pid,addtocart.quantity as quantity,addtocart.id as wid from addtocart join products on products.id=addtocart.productId where addtocart.userId='".$_SESSION['id']."'");  
 $num=mysqli_num_rows($ret);
 	if($num>0)
 	{ 
 		?>
 		<table class="table table-bordered">
+	
 
 	
 				<thead>

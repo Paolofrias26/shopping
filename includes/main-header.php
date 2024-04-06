@@ -60,7 +60,8 @@
 				<div class="basket">
 					<i class="glyphicon glyphicon-shopping-cart"></i>
 				</div>
-				<div class="basket-item-count"><span class="count"><?php echo $_SESSION['qnty'];?></span></div>
+				<div class="basket-item-count"><span class="count"><?php echo $_SESSION['cartItemCount']; ?></span></div>
+
 
 		    </div>
 		</a>

@@ -5,16 +5,6 @@ include('includes/config.php');
 if(strlen($_SESSION['login'])==0) {
     header('location:login.php');
 } else {
-    if(isset($_POST['order_id'])) {
-        $orderId = $_POST['order_id'];
-        $updateQuery = mysqli_query($con, "UPDATE orders SET orderStatus='Canceled' WHERE id='$orderId'");
-        if($updateQuery) {
-            echo "<script>alert('Order canceled successfully');</script>";
-        } else {
-            $errorMessage = mysqli_error($con);
-            echo "<script>alert('Failed to cancel order: $errorMessage');</script>";
-        }
-    }
 ?>
 
 <!DOCTYPE html>
@@ -61,7 +51,7 @@ if(strlen($_SESSION['login'])==0) {
             popUpWin = open(URLStr,'popUpWin', 'toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=no,copyhistory=yes,width='+600+',height='+600+',left='+left+', top='+top+',screenX='+left+',screenY='+top+'');
         }
     </script>
-    <style>
+        <style>
         .custom-table th {
     text-align: center;
     background-color: #0000FF;
@@ -101,14 +91,13 @@ if(strlen($_SESSION['login'])==0) {
 <div class="breadcrumb">
     <div class="container">
         <div class="breadcrumb-inner">
-    
-
-
+           
         </div>
         <div class="breadcrumb-inner">
             <ul class="list-inline list-unstyled">
                 <li><a href="#">Home</a></li>
-                <li class='active'>Shopping Cart</li>
+                <li class='active'>Cart</li>
+                <li class='active'>To Ship</li>
             </ul>
         </div>
     </div>
@@ -117,7 +106,6 @@ if(strlen($_SESSION['login'])==0) {
 
 <!-- Body Content -->
 <div class="body-content outer-top-xs">
-    
     <div class="container">
         <div class="row inner-bottom-sm">
             <div class="shopping-cart">
@@ -127,8 +115,8 @@ if(strlen($_SESSION['login'])==0) {
                         <table class="table table-bordered">
     <thead class="custom-table">
         <tr>
-            <th style=" background-color: #007bff;"><a style="color: black;" href="order-history.php" class="btn btn-link">All</a></th>
-            <th><a href="ship_orders.php" class="btn btn-link">To Ship</a></th>
+            <th><a href="order-history.php" class="btn btn-link">All</a></th>
+            <th style=" background-color: #007bff;"><a style="color: black;" href="ship_orders.php" class="btn btn-link">To Ship</a></th>
             <th><a href="completed_orders.php" class="btn btn-link">Completed</a></th>
             <th><a href="canceled_orders.php" class="btn btn-link">Canceled</a></th>
         </tr>
@@ -138,7 +126,7 @@ if(strlen($_SESSION['login'])==0) {
                             <table class="table table-bordered">
                                 <thead>
                                 <tr>
-                                    <!-- <th class="cart-romove item">OrderID</th> -->
+                                  
                                     <th class="cart-description item">Image</th>
                                     <th class="cart-product-name item">Product Name</th>
                                     <th class="cart-qty item">Quantity</th>
@@ -153,18 +141,12 @@ if(strlen($_SESSION['login'])==0) {
                                 </thead>
                                 <tbody>
                                 <?php
-                               $query = mysqli_query($con, "SELECT orders.id as order_id, products.productImage1 as pimg1, products.productName as pname, products.id as proid, orders.productId as opid, orders.quantity as qty, products.productPrice as pprice, products.shippingCharge as shippingcharge, orders.paymentMethod as paym, orders.orderDate as odate, orders.id as orderid 
-                               FROM orders 
-                               JOIN products ON orders.productId = products.id 
-                               WHERE orders.userId = '".$_SESSION['id']."' 
-                               AND orders.paymentMethod IS NOT NULL 
-                               AND orders.orderStatus != 'Canceled'");
-   
+                                 $query=mysqli_query($con,"select orders.id as order_id, products.productImage1 as pimg1,products.productName as pname,products.id as proid,orders.productId as opid,orders.quantity as qty,products.productPrice as pprice,products.shippingCharge as shippingcharge,orders.paymentMethod as paym,orders.orderDate as odate,orders.id as orderid from orders join products on orders.productId=products.id where orders.userId='".$_SESSION['id']."' and orders.paymentMethod is not null and orders.orderStatus = 'in process'");
                                 $cnt=1;
                                 while($row=mysqli_fetch_array($query)) {
                                 ?>
                                 <tr>
-                                    
+                                   
                                     <td class="cart-image">
                                         <a class="entry-thumbnail" href="product-details.php?pid=<?php echo $row['opid'];?>">
                                             <img src="admin/productimages/<?php echo $row['proid'];?>/<?php echo $row['pimg1'];?>" alt="" width="84" height="146">
@@ -186,7 +168,7 @@ if(strlen($_SESSION['login'])==0) {
 								
 									<td>
 									<form method="post">
-                            <input type="hidden" name="order_id" value="<?php echo htmlentities($row['order_id']); ?>">
+                            <input type="hidden" name="order_id" value="<?php echo htmlentities($row['orderid']); ?>">
                             <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this order?');">Cancel</button>
                         </form>
 									</td>																								

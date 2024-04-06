@@ -12,7 +12,7 @@ if(strlen($_SESSION['alogin'])==0) {
 
         $query=mysqli_query($con,"insert into ordertrackhistory(orderId,status,remark) values('$oid','$status','$remark')");
         $sql=mysqli_query($con,"update orders set orderStatus='$status' where id='$oid'");
-        echo "<script>alert('Order updated sucessfully...');</script>";
+        echo "<script>alert('Order updated successfully...');</script>";
     }
 }
 ?>
@@ -22,7 +22,7 @@ if(strlen($_SESSION['alogin'])==0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Compliant</title>
+    <title>Update Order</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -54,8 +54,7 @@ if(strlen($_SESSION['alogin'])==0) {
         ?>
         <div class="row">
             <div class="col">
-            <p><b>At Date:</b> <?php echo date('g:i a', strtotime($row['postingDate']));?></p>
-
+                <p><b>At Date:</b> <?php echo date('g:i a', strtotime($row['postingDate']));?></p>
                 <p><b>Status:</b> <?php echo $row['status'];?></p>
                 <p><b>Remark:</b> <?php echo $row['remark'];?></p>
                 <hr style="border-top: 3px dashed red">
@@ -66,13 +65,15 @@ if(strlen($_SESSION['alogin'])==0) {
         $st='Delivered';
         $rt = mysqli_query($con,"SELECT * FROM orders WHERE id='$oid'");
         while($num=mysqli_fetch_array($rt)) {
-            $currrentSt=$num['orderStatus'];
+            $currentSt=$num['orderStatus'];
         }
-        if($st==$currrentSt) { ?>
+        if($st==$currentSt) { ?>
             <div class="row">
                 <div class="col">
                     <p><b>Product Delivered</b></p>
+                    <button type="button" class="btn btn-primary" onclick="editOrder()">Edit</button>
                 </div>
+                <button type="button" class="btn btn-primary" onclick="viewReceipt()">View Receipt</button>
             </div>
             <hr>
         <?php } else { ?>
@@ -83,7 +84,7 @@ if(strlen($_SESSION['alogin'])==0) {
                         <label for="status">Status:</label>
                         <select class="form-control" id="status" name="status" required>
                             <option value="">Select Status</option>
-                            <option value="in Process">In Process</option>
+                            <option value="In Process">In Process</option>
                             <option value="Delivered">Delivered</option>
                         </select>
                     </div>
@@ -113,6 +114,10 @@ if(strlen($_SESSION['alogin'])==0) {
     function viewReceipt() {
         var receiptWindow = window.open('view-receipt.php?oid=<?php echo $oid; ?>', '_blank');
         receiptWindow.focus();
+    }
+
+    function editOrder() {
+        window.location.href = 'edit-order.php?oid=<?php echo $oid; ?>';
     }
 </script>
 

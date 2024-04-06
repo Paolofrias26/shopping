@@ -5,8 +5,8 @@ require_once 'vendor/autoload.php';
 
 // Twilio API credentials
 $account_sid = 'ACa748f438558aba174105f4f51960f7f9';
-$auth_token = '3871b7428a50e3f79c5b45370db34020';
-$twilio_phone_number = '+15168304506';
+$auth_token = '47edc33f3969b45e62bd596a767486f0';
+$twilio_phone_number = '++15168304506';
 
 session_start();
 error_reporting(0);
@@ -52,7 +52,7 @@ if (isset($_POST['submit'])) {
             $recipient_phone_number,
             array(
                 'from' => $twilio_phone_number,
-                'body' => "Your OTP is: $otp"
+                'body' => "Hello! $name Your OTP is: $otp"
             )
         );
 

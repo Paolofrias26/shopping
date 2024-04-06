@@ -5,16 +5,6 @@ include('includes/config.php');
 if(strlen($_SESSION['login'])==0) {
     header('location:login.php');
 } else {
-    if(isset($_POST['order_id'])) {
-        $orderId = $_POST['order_id'];
-        $updateQuery = mysqli_query($con, "UPDATE orders SET orderStatus='Canceled' WHERE id='$orderId'");
-        if($updateQuery) {
-            echo "<script>alert('Order canceled successfully');</script>";
-        } else {
-            $errorMessage = mysqli_error($con);
-            echo "<script>alert('Failed to cancel order: $errorMessage');</script>";
-        }
-    }
 ?>
 
 <!DOCTYPE html>
@@ -61,7 +51,7 @@ if(strlen($_SESSION['login'])==0) {
             popUpWin = open(URLStr,'popUpWin', 'toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=no,copyhistory=yes,width='+600+',height='+600+',left='+left+', top='+top+',screenX='+left+',screenY='+top+'');
         }
     </script>
-    <style>
+      <style>
         .custom-table th {
     text-align: center;
     background-color: #0000FF;
@@ -101,14 +91,12 @@ if(strlen($_SESSION['login'])==0) {
 <div class="breadcrumb">
     <div class="container">
         <div class="breadcrumb-inner">
-    
-
-
         </div>
         <div class="breadcrumb-inner">
             <ul class="list-inline list-unstyled">
                 <li><a href="#">Home</a></li>
-                <li class='active'>Shopping Cart</li>
+                <li class=''>Cart</li>
+                <li>Complete Orders</li>
             </ul>
         </div>
     </div>
@@ -117,7 +105,6 @@ if(strlen($_SESSION['login'])==0) {
 
 <!-- Body Content -->
 <div class="body-content outer-top-xs">
-    
     <div class="container">
         <div class="row inner-bottom-sm">
             <div class="shopping-cart">
@@ -127,9 +114,9 @@ if(strlen($_SESSION['login'])==0) {
                         <table class="table table-bordered">
     <thead class="custom-table">
         <tr>
-            <th style=" background-color: #007bff;"><a style="color: black;" href="order-history.php" class="btn btn-link">All</a></th>
+            <th><a href="order-history.php" class="btn btn-link">All</a></th>
             <th><a href="ship_orders.php" class="btn btn-link">To Ship</a></th>
-            <th><a href="completed_orders.php" class="btn btn-link">Completed</a></th>
+            <th style=" background-color: #007bff;"><a style="color: black;" href="completed_orders.php" class="btn btn-link">Completed</a></th>
             <th><a href="canceled_orders.php" class="btn btn-link">Canceled</a></th>
         </tr>
     </thead>
@@ -147,24 +134,25 @@ if(strlen($_SESSION['login'])==0) {
                                     <th class="cart-total item">Grandtotal</th>
                                     <th class="cart-total item">Payment Method</th>
                                     <th class="cart-description item">Order Date</th>
-									<th class="cart-total item">Cancel Order</th>
                                     <th class="cart-total last-item">Action</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <?php
-                               $query = mysqli_query($con, "SELECT orders.id as order_id, products.productImage1 as pimg1, products.productName as pname, products.id as proid, orders.productId as opid, orders.quantity as qty, products.productPrice as pprice, products.shippingCharge as shippingcharge, orders.paymentMethod as paym, orders.orderDate as odate, orders.id as orderid 
-                               FROM orders 
-                               JOIN products ON orders.productId = products.id 
-                               WHERE orders.userId = '".$_SESSION['id']."' 
-                               AND orders.paymentMethod IS NOT NULL 
-                               AND orders.orderStatus != 'Canceled'");
+                              $userId = $_SESSION['id']; // Assuming userId is correctly set in your session
+
+                              $query = mysqli_query($con, "SELECT products.productImage1 as pimg1, products.productName as pname, products.id as proid, orders.productId as opid, orders.quantity as qty, products.productPrice as pprice, products.shippingCharge as shippingcharge, orders.paymentMethod as paym, orders.orderDate as odate, orders.id as orderid 
+                                                             FROM orders 
+                                                             JOIN products ON orders.productId=products.id 
+                                                             WHERE orders.userId='$userId' 
+                                                             AND orders.orderStatus = 'Delivered'");
+                              
    
                                 $cnt=1;
                                 while($row=mysqli_fetch_array($query)) {
                                 ?>
                                 <tr>
-                                    
+                             
                                     <td class="cart-image">
                                         <a class="entry-thumbnail" href="product-details.php?pid=<?php echo $row['opid'];?>">
                                             <img src="admin/productimages/<?php echo $row['proid'];?>/<?php echo $row['pimg1'];?>" alt="" width="84" height="146">
@@ -183,14 +171,7 @@ if(strlen($_SESSION['login'])==0) {
 									<td class="cart-product-sub-total" style="white-space: nowrap;">
    																		 <?php echo date('g:i a', strtotime($row['odate'])); ?>
 																																</td>
-								
-									<td>
-									<form method="post">
-                            <input type="hidden" name="order_id" value="<?php echo htmlentities($row['order_id']); ?>">
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this order?');">Cancel</button>
-                        </form>
-									</td>																								
-                        <td>
+							        <td>
                             <a href="javascript:void(0);" onClick="popUpWindow('track-order.php?oid=<?php echo htmlentities($row['orderid']);?>');" title="Track order">Track</a>
                         </td>
                     </tr>

@@ -450,7 +450,7 @@ $num=mysqli_num_rows($rt);
 
 									<div class="col-sm-7">
 <?php if($row['productAvailability']=='In Stock'){?>
-										<a href="product-details.php?page=product&action=add&id=<?php echo $row['id']; ?>" class="btn btn-primary"><i class="fa fa-shopping-cart inner-right-vs"></i> ADD TO CART</a>
+										<a href="product-details.php?page=product&action=add&id=<?php echo $row['id']; ?>" class="btn btn-primary"><i class="fa fa-shopping-cart inner-right-vs"></i>Buy Now</a>
 													<?php } else {?>
 							<div class="action" style="color:red">Out of Stock</div>
 					<?php } ?>

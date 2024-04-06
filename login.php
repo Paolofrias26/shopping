@@ -94,6 +94,16 @@ if(isset($_POST['login']))
 
 		<!-- Favicon -->
 		<link rel="shortcut icon" href="assets/images/988logo.ico">
+		<style>
+			.smaller-image {
+    max-width: 70%; /* Ensures the image does not exceed its parent's width */
+    height: auto; /* Allows the image to scale proportionally */
+    display: block; /* Ensures proper display */
+    margin: 0 auto; /* Centers the image horizontally */
+	
+}
+
+		</style>
 <script type="text/javascript">
 function valid()
 {
@@ -158,40 +168,50 @@ error:function (){}
 <div class="body-content outer-top-bd">
 	<div class="container">
 		<div class="sign-in-page inner-bottom-sm">
-			<div class="row">
-				<!-- Sign-in -->
-<div class="col-md-6 col-sm-6 sign-in">
-	<h4 class="">sign in</h4>
-	<p class="">Hello, Mag sign in para makakuha ng libreng voucher.</p>
-	<form class="register-form outer-top-xs" method="post">
-	<?php if(isset($_SESSION['errmsg']) && !empty($_SESSION['errmsg'])): ?>
-    <div class="alert alert-danger" role="alert">
-        <?php echo htmlentities($_SESSION['errmsg']); ?>
-        <?php echo htmlentities($_SESSION['errmsg'] = ""); ?>
+		<div class="row">
+    <!-- Sign-in -->
+    <div class="col-md-6 col-sm-6 sign-in">
+        <h4 class="">Login</h4>
+        <p class="">Hello, Mag sign in na at subukan ang aming website!</p>
+        <form class="register-form outer-top-xs" method="post">
+            <?php if(isset($_SESSION['errmsg']) && !empty($_SESSION['errmsg'])): ?>
+            <div class="alert alert-danger" role="alert">
+                <?php echo htmlentities($_SESSION['errmsg']); ?>
+                <?php echo htmlentities($_SESSION['errmsg'] = ""); ?>
+            </div>
+            <?php endif; ?>
+			<form class="register-form outer-top-xs" method="post">
+            <?php if(isset($_SESSION['logout']) && !empty($_SESSION['logout'])): ?>
+            <div class="alert alert-success" role="alert">
+                <?php echo htmlentities($_SESSION['logout']); ?>
+                <?php echo htmlentities($_SESSION['logout'] = ""); ?>
+            </div>
+            <?php endif; ?>
+            <div class="form-group">
+                <label class="info-title" for="exampleInputEmail1">Email Address <span>*</span></label>
+                <input type="email" name="email" class="form-control unicase-form-control text-input" id="exampleInputEmail1">
+            </div>
+            <div class="form-group">
+                <label class="info-title" for="exampleInputPassword1">Password <span>*</span></label>
+                <input type="password" name="password" class="form-control unicase-form-control text-input" id="exampleInputPassword1">
+            </div>
+            <div class="radio outer-xs">
+                <a href="createAccount.php" class="forgot-password pull-left">Create Account</a>
+            </div>
+            <div class="radio outer-xs">
+                <a href="#" class="forgot-password pull-right">Forgot your Password?</a>
+            </div>
+            <button type="submit" class="btn-upper btn btn-primary checkout-page-button" name="login">Login</button>
+        </form>
     </div>
-<?php endif; ?>
-	</span>
-		<div class="form-group">
-		    <label class="info-title" for="exampleInputEmail1">Email Address <span>*</span></label>
-		    <input type="email" name="email" class="form-control unicase-form-control text-input" id="exampleInputEmail1" >
-		</div>
-	  	<div class="form-group">
-		    <label class="info-title" for="exampleInputPassword1">Password <span>*</span></label>
-		 <input type="password" name="password" class="form-control unicase-form-control text-input" id="exampleInputPassword1" >
-		</div>
-		<div class="radio outer-xs">
-		  	<a href="createAccount.php" class="forgot-password pull-left">Create Account</a>
-		</div>
-		<div class="radio outer-xs">
-		  	<a href="#" class="forgot-password pull-right">Forgot your Password?</a>
-		</div>
-	  	<button type="submit" class="btn-upper btn btn-primary checkout-page-button" name="login">Login</button>
-	</form>
-</div>
-<!-- Sign-in -->
 
+    <div class="col-md-6 col-sm-6 image">
+        <!-- Smaller image with added CSS class -->
+        <img src="img/988shop.png" alt="" class="smaller-image">
+    </div>
+</div><!-- /.row -->
 
-<!-- create a new account -->			</div><!-- /.row -->
+		
 		</div>
 <?php include('includes/brands-slider.php');?>
 </div>
