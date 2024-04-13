@@ -8,7 +8,8 @@ header('location:index.php');
 }
 else{
 date_default_timezone_set('Asia/Kolkata');// change according timezone
-$currentTime = date( 'd-m-Y h:i:s A', time () );
+$currentTime = date('Y-m-d H:i:s'); // Current timestamp in the correct format for MySQL
+    
 
 
 if(isset($_POST['submit']))
@@ -17,7 +18,21 @@ if(isset($_POST['submit']))
 	$description=$_POST['description'];
 	$id=intval($_GET['id']);
 $sql=mysqli_query($con,"update category set categoryName='$category',categoryDescription='$description',updationDate='$currentTime' where id='$id'");
-$_SESSION['msg']="Category Updated !!";
+
+    // Fetching admin email
+	$admin_username = $_SESSION['alogin'];
+	$admin_query = mysqli_query($con, "SELECT * FROM admin WHERE username = '$admin_username'");
+	$admin_row = mysqli_fetch_assoc($admin_query);
+	$admin_email = $admin_row['email'];
+	$ip_address = $_SERVER['REMOTE_ADDR'];
+	$category_details = "Update the category : $category";
+	
+	// Logging admin action
+	$action = "Updating Category";
+	
+	// Inserting into admin logs
+	$log_sql = mysqli_query($con, "INSERT INTO adminlogs (admin_email, action, timestamp,  IP_Address, details) VALUES ('$admin_email', '$action', '$currentTime' , '$ip_address', '$category_details')");
+header('Location: category.php'); 
 
 }
 

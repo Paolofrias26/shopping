@@ -71,6 +71,13 @@ $num1 = mysqli_num_rows($rt);
 									Manage Admin
 								</a>
 								
+							<li>
+								<a href="admin-logs.php">
+									<i class="menu-icon icon-group"></i>
+									Admin Logs
+								</a>
+								
+							</li>
 							</li>
 							</ul>
 						

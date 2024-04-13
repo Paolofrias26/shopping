@@ -2,83 +2,45 @@
 session_start();
 include('include/config.php');
 
-// Redirect user to login page if not logged in
 if (empty($_SESSION['alogin'])) {
     header('location:index.php');
     exit();
 }
 
-// Set timezone
-date_default_timezone_set('Asia/Kolkata');
-$currentTime = date('Y-m-d H:i:s');
-
-// Handle form submission for adding new admin
-if (isset($_POST['submit'])) {
-    $email = $_POST['email'];
-    $firstname = $_POST['firstname'];
-    $lastname = $_POST['lastname'];
-    $gender = $_POST['gender'];
-    $username = $_POST['username'];
-    $password = md5($_POST['password']); // Consider using more secure encryption methods
-    $role = $_POST['role'];
-
-    // Insert admin details into the database
-    $query = "INSERT INTO admin (email, firstname, lastname, gender, username, password, role, creationDate) VALUES ('$email', '$firstname', '$lastname', '$gender', '$username', '$password', '$role', '$currentTime')";
-    $result = mysqli_query($con, $query);
-
-    if ($result) {
-        $_SESSION['msg'] = "Admin added successfully!";
-    } else {
-        $_SESSION['msg'] = "Failed to add admin. Please try again.";
-    }
-
-    // Redirect back to the same page after form submission
-    header("Location: ".$_SERVER['PHP_SELF']);
-    exit();
+if (isset($_GET['id'])) {
+    $admin_id = $_GET['id'];
 }
 
-// Handle deletion of admin account
-if (isset($_GET['del'])) {
-    mysqli_query($con, "DELETE FROM admin WHERE id = '" . $_GET['del'] . "'");
-    $_SESSION['msg'] = "Admin Account Deleted Successfully!";
+if (isset($_POST['changepass'])) {
+    $new_password = $_POST['new_password'];
+    $confirm_password = $_POST['confirm_password'];
+
+    // Check if new password and confirm password match
+    if ($new_password === $confirm_password) {
+        // Hash the new password
+        $new_password_hashed = md5($new_password);
+
+        // Update the admin password in the database
+        $query = "UPDATE admin SET password='$new_password_hashed' WHERE id='$admin_id'";
+        $result = mysqli_query($con, $query);
+
+        if ($result) {
+            $_SESSION['msg'] = "Password changed successfully!";
+            header("Location: manage-admin.php?edit=".$admin_id);
+        } else {
+            $_SESSION['msg'] = "Failed to change password. Please try again.";
+        }
+    } else {
+        $_SESSION['errmsg'] = "New password and confirm password do not match.";
+        header("Location: ".$_SERVER['PHP_SELF']."?id=".$admin_id);
+    }
+
+    // Redirect back to the manage-admin.php page with the admin ID
     
-    // Redirect back to the same page after deletion
-    header("Location: ".$_SERVER['PHP_SELF']);
     exit();
-}
-
-// Handle form submission for updating admin details
-if (isset($_POST['update'])) {
-    $id = $_POST['id'];
-    $email = $_POST['email'];
-    $firstname = $_POST['firstname'];
-    $lastname = $_POST['lastname'];
-    $gender = $_POST['gender'];
-    $username = $_POST['username'];
-    $role = $_POST['role'];
-
-    // Update admin details in the database
-    $query = "UPDATE admin SET email='$email', firstname='$firstname', lastname='$lastname', gender='$gender', username='$username', role='$role' WHERE id='$id'";
-    $result = mysqli_query($con, $query);
-
-    if ($result) {
-        $_SESSION['msg'] = "Admin updated successfully!";
-    } else {
-        $_SESSION['msg'] = "Failed to update admin. Please try again.";
-    }
-
-    // Redirect back to the same page after form submission
-    header("Location: ".$_SERVER['PHP_SELF']);
-    exit();
-}
-
-// Handle edit action to populate form with admin data
-if (isset($_GET['edit'])) {
-    $edit_id = $_GET['edit'];
-    $edit_query = mysqli_query($con, "SELECT * FROM admin WHERE id='$edit_id'");
-    $edit_row = mysqli_fetch_assoc($edit_query);
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -130,6 +92,14 @@ if (isset($_GET['edit'])) {
                                                 
                                                 <?php unset($_SESSION['msg']); // Clear the message after displaying it ?>
                                             <?php endif; ?>
+                                <?php if(isset($_SESSION['errmsg'])): ?>
+                                    <div class="alert alert-danger">
+                                        <button type="button" class="close" data-dismiss="alert">×</button>
+                                        <strong>Error!</strong> <?php echo htmlentities($_SESSION['errmsg']); ?>
+                                    </div>
+                                    
+                                    <?php unset($_SESSION['errmsg']); // Clear the error message after displaying it ?>
+                                <?php endif; ?>
                                     <div class="module">
                                         <div class="module-head">
                                         <h3>
@@ -137,85 +107,30 @@ if (isset($_GET['edit'])) {
     if(isset($_GET['edit'])) {
         echo "Update Admin";
     } else {
-        echo '<a href="?add" >Add Admin</a>';
+        echo '<a href="?id='.$_SESSION['alogin'].'" >Change Password</a>';
     }
     ?>
 </h3>
 
                                         </div>
                                         <div class="module-body">
-                                        <?php if(isset($_GET['edit']) || isset($_GET['add'])): ?>
+                                       
                                             <br />
                                             
                                             <!-- Check if edit or add action is being performed -->
-    <form class="form-horizontal row-fluid" name="AdminForm" method="post">
-    <div class="control-group">
-        <label class="control-label" for="email">Email</label>
-        <div class="controls">
-            <input type="text" placeholder="Enter Email" name="email" class="span8 tip" required value="<?php if(isset($_GET['edit'])) { echo $edit_row['email']; } ?>">
-        </div>
+                                            <form class="form-horizontal row-fluid" method="post">
+    <div class="form-group">
+        <label for="new_password">New Password</label>
+        <input type="password" name="new_password" id="new_password" class="form-control" required>
     </div>
-    <div class="control-group">
-        <label class="control-label" for="firstname">First Name</label>
-        <div class="controls">
-            <input type="text" placeholder="Enter First Name" name="firstname" class="span8 tip" required value="<?php if(isset($_GET['edit'])) { echo $edit_row['firstname']; } ?>">
-        </div>
+    <div class="form-group">
+        <label for="confirm_password">Confirm Password</label>
+        <input type="password" name="confirm_password" id="confirm_password" class="form-control" required>
     </div>
-    <div class="control-group">
-        <label class="control-label" for="lastname">Last Name</label>
-        <div class="controls">
-            <input type="text" placeholder="Enter Last Name" name="lastname" class="span8 tip" required value="<?php if(isset($_GET['edit'])) { echo $edit_row['lastname']; } ?>">
-        </div>
-    </div>
-    <div class="control-group">
-        <label class="control-label" for="gender">Gender</label>
-        <div class="controls">
-            <select name="gender" class="span8 tip" required>
-                <option value="">Select Gender</option>
-                <option value="Male" <?php if(isset($_GET['edit']) && $edit_row['gender'] == 'Male') { echo "selected"; } ?>>Male</option>
-                <option value="Female" <?php if(isset($_GET['edit']) && $edit_row['gender'] == 'Female') { echo "selected"; } ?>>Female</option>
-            </select>
-        </div>
-    </div>
-    <div class="control-group">
-        <label class="control-label" for="username">Username</label>
-        <div class="controls">
-            <input type="text" placeholder="Enter Username" name="username" class="span8 tip" required value="<?php if(isset($_GET['edit'])) { echo $edit_row['username']; } ?>">
-        </div>
-    </div>
-    <div class="control-group">
-        <label class="control-label" for="password">Password</label>
-        <div class="controls">
-        <input type="password" placeholder="Enter Password" name="password" class="span8 tip" required <?php if(isset($_GET['edit'])) { echo 'value="' . $edit_row['password'] . '" disabled'; } ?>>
+    <button type="submit" name="changepass" class="btn btn-primary">Change Password</button>
+</form>
 
-        </div>
-    </div>
-    <?php if(isset($_GET['edit'])): ?>
-        <input type="hidden" name="id" value="<?php echo $edit_row['id']; ?>">
-    <?php endif; ?>
-    <hr>
-    <div class="control-group">
-        <label class="control-label" for="role">Role</label>
-        <div class="controls">
-            <select name="role" class="span8 tip" required>
-                <option value="">Select Role</option>
-                <option value="admin" <?php if(isset($_GET['edit']) && $edit_row['role'] == 'admin') { echo "selected"; } ?>>Admin</option>
-                <option value="superadmin" <?php if(isset($_GET['edit']) && $edit_row['role'] == 'superadmin') { echo "selected"; } ?>>Super Admin</option>
-            </select>
-        </div>
-    </div>
-    <div class="control-group">
-    <div class="controls">
-        <button type="submit" name="<?php if(isset($_GET['edit'])) { echo "update"; } else { echo "submit"; } ?>" class="btn btn-primary"><?php if(isset($_GET['edit'])) { echo "Update"; } else { echo "Create"; } ?></button>
-        <?php if(isset($_GET['edit'])): ?>
-            <a href="adminchangepassword.php?id=<?php echo $edit_row['id']; ?>" class="btn btn-danger">Change Password</a>
-        <?php endif; ?>
-    </div>
-</div>
 
-    </div>
-    </form>
-<?php endif; ?>
 
                                         </div>
                                     </div>

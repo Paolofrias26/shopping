@@ -1,32 +1,70 @@
-
 <?php
 session_start();
 include('include/config.php');
-if(strlen($_SESSION['alogin'])==0)
-	{	
-header('location:index.php');
-}
-else{
-date_default_timezone_set('Asia/Kolkata');// change according timezone
-$currentTime = date( 'd-m-Y h:i:s A', time () );
 
+if(strlen($_SESSION['alogin']) == 0) {    
+    header('location:index.php');
+} else {
+    date_default_timezone_set('Asia/Kolkata'); // Change according to timezone
+    $currentTime = date('Y-m-d H:i:s'); // Current timestamp in the correct format for MySQL
+    
+    if(isset($_POST['submit'])) {
+        $category = $_POST['category'];
+        $description = $_POST['description'];
+        
+        // Inserting category
+        $sql = mysqli_query($con, "INSERT INTO category (categoryName, categoryDescription) VALUES ('$category', '$description')");
+        if($sql) {
+            $_SESSION['msg'] = "Category Created !!";
+            
+            // Fetching admin email
+			$admin_username = $_SESSION['alogin'];
+			$admin_query = mysqli_query($con, "SELECT * FROM admin WHERE username = '$admin_username'");
+			$admin_row = mysqli_fetch_assoc($admin_query);
+			$admin_email = $admin_row['email'];
+			$ip_address = $_SERVER['REMOTE_ADDR'];
+			$category_details = "Creating Category named . $category";
+            
+            // Logging admin action
+            $action = "insert a category";
+            
+            // Inserting into admin logs
+            $log_sql = mysqli_query($con, "INSERT INTO adminlogs (admin_email, action, timestamp,  IP_Address, details) VALUES ('$admin_email', '$action', '$currentTime' , '$ip_address', '$category_details')");
+            
+            
+        } else {
+            // Category insertion failed, handle the error
+            $_SESSION['error'] = "Failed to create category!";
+        }
+    }
 
-if(isset($_POST['submit']))
-{
-	$category=$_POST['category'];
-	$description=$_POST['description'];
-$sql=mysqli_query($con,"insert into category(categoryName,categoryDescription) values('$category','$description')");
-$_SESSION['msg']="Category Created !!";
+    if(isset($_GET['del'])) {
+      
+		// Fetching admin email
+$admin_username = $_SESSION['alogin'];
+$admin_query = mysqli_query($con, "SELECT * FROM admin WHERE username = '$admin_username'");
+$admin_row = mysqli_fetch_assoc($admin_query);
+$admin_email = $admin_row['email'];
+$ip_address = $_SERVER['REMOTE_ADDR'];
+  // Fetching category name
+  $category_id = $_GET['id'];
+  $category_query = mysqli_query($con, "SELECT * FROM category WHERE id = '$category_id'");
+  $category_row = mysqli_fetch_assoc($category_query);
+  $category_name = $category_row['categoryName'];
+$category_details = "Deleting Category named : ".$category_name; // Provide appropriate details about the category being deleted
 
-}
+// Logging admin action
+$action = "delete a category";
 
-if(isset($_GET['del']))
-		  {
-		          mysqli_query($con,"delete from category where id = '".$_GET['id']."'");
-                  $_SESSION['delmsg']="Category deleted !!";
-		  }
+// Inserting into admin logs
+$log_sql = mysqli_query($con, "INSERT INTO adminlogs (admin_email, action, timestamp, IP_Address, details) VALUES ('$admin_email', '$action', '$currentTime', '$ip_address', '$category_details')");
 
+mysqli_query($con, "DELETE FROM category WHERE id = '".$_GET['id']."'");
+$_SESSION['delmsg'] = "Category deleted !!";
+    }
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,6 +92,12 @@ if(isset($_GET['del']))
 								<h3>Category</h3>
 							</div>
 							<div class="module-body">
+							<?php 
+    if(isset($_SESSION['msg'])) {
+        echo '<script>alert("Category Updated !");</script>';
+        unset($_SESSION['msg']); // Clear the session variable after displaying the alert
+    }
+    ?>
 
 									<?php if(isset($_POST['submit']))
 {?>

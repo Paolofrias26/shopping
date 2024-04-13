@@ -5,14 +5,46 @@ error_reporting(0);
 
 // Include configuration file
 include('includes/config.php');
+if(isset($_POST['submit'])){
+	if(!empty($_SESSION['cart'])){
+	foreach($_POST['quantity'] as $key => $val){
+		if($val==0){
+			unset($_SESSION['cart'][$key]);
+		}else{
+			$_SESSION['cart'][$key]['quantity']=$val;
 
+		}
+	}
+		echo "<script>alert('Your Cart hasbeen Updated');</script>";
+	}
+}
 // Check if the user is logged in
 if (strlen($_SESSION['login']) == 0) {
     // Redirect to login page if not logged in
     header('location:login.php');
 } else {
 
-
+	if(isset($_POST['update_cart'])) {
+		// Loop through the selected items in the shopping cart
+		
+			// Retrieve quantity for the item
+			// $quantity = $_POST['quantity'][$wid]; // Correctly retrieve quantity for each item
+			
+			// Update the quantity in the database for the specific item
+			$query = "UPDATE addtocart SET quantity='$quantity' WHERE id='$wid'";
+			$result = mysqli_query($con, $query);
+			
+			// Handle result (you can add error handling if needed)
+			if($result) {
+				// Database updated successfully
+				echo "Shopping cart updated successfully.";
+			} else {
+				// Error occurred
+				echo "Error updating shopping cart: " . mysqli_error($con);
+			}
+		
+	}
+	
 
 // Remove product from cart and database
 if (isset($_POST['remove_item'])) {
@@ -36,34 +68,12 @@ if (isset($_POST['remove_item'])) {
 
 if (isset($_POST['ordersubmit'])) {
     // Fetch cart items
-    $cartQuery = mysqli_query($con, "SELECT * FROM addtocart WHERE userId = '".$_SESSION['id']."'");
-    
-    // Check if cart is not empty
-    if (mysqli_num_rows($cartQuery) > 0) {
-        while ($cartRow = mysqli_fetch_assoc($cartQuery)) {
-            $productId = $cartRow['productId'];
-            $quantity = $cartRow['quantity'];
-            
-            // Insert cart item into orders table
-            $insertOrderQuery = mysqli_query($con, "INSERT INTO orders (userId, productId, quantity, orderStatus, orderDate) VALUES ('".$_SESSION['id']."', '$productId', '$quantity', 'Pending', NOW())");
-            
-            // Remove the item from the cart
-            $removeFromCartQuery = mysqli_query($con, "DELETE FROM addtocart WHERE userId = '".$_SESSION['id']."' AND productId = '$productId'");
-            
-            if (!$insertOrderQuery || !$removeFromCartQuery) {
-                // Display error message
-                echo "<script>alert('Error: Unable to submit order. Please try again later.');</script>";
-                break;
-            }
-        }
+   
         
         // Redirect to payment method page
         header('location: payment-method.php');
         exit();
-    } else {
-        // Display error message if cart is empty
-        echo "<script>alert('Your shopping cart is empty.');</script>";
-    }
+  
 }
     // Check if the user is logged in
 
@@ -206,7 +216,7 @@ $num=mysqli_num_rows($ret);
 							<div class="shopping-cart-btn">
 								<span class="">
 									<a href="index.php" class="btn btn-upper btn-primary outer-left-xs">Continue Shopping</a>
-									<input type="submit" name="submit" value="Update shopping cart" class="btn btn-upper btn-primary pull-right outer-right-xs">
+									<input type="submit" name="update_cart" value="Update shopping cart" class="btn btn-upper btn-primary pull-right outer-right-xs">
 								</span>
 							</div><!-- /.shopping-cart-btn -->
 						</td>
@@ -259,7 +269,7 @@ while ($row=mysqli_fetch_array($ret)) {
 									<div class="arrow plus gradient"><span class="ir"><i class="icon fa fa-sort-asc"></i></span></div>
 									<div class="arrow minus gradient"><span class="ir"><i class="icon fa fa-sort-desc"></i></span></div>
 									</div>
-								<input type="text" value="<?php echo $row['quantity']?>">
+								<input type="text" name="quantity" value="<?php echo $row['quantity']?>">
 
 							</div>
 						</td>

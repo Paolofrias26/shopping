@@ -8,7 +8,30 @@ header('location:login.php');
 }
 else{
 	if (isset($_POST['submit'])) {
-
+		$cartQuery = mysqli_query($con, "SELECT * FROM addtocart WHERE userId = '".$_SESSION['id']."'");
+    
+		// Check if cart is not empty
+		if (mysqli_num_rows($cartQuery) > 0) {
+			while ($cartRow = mysqli_fetch_assoc($cartQuery)) {
+				$productId = $cartRow['productId'];
+				$quantity = $cartRow['quantity'];
+				
+				// Insert cart item into orders table
+				$insertOrderQuery = mysqli_query($con, "INSERT INTO orders (userId, productId, quantity, orderStatus, orderDate) VALUES ('".$_SESSION['id']."', '$productId', '$quantity', 'Pending', NOW())");
+				
+				// Remove the item from the cart
+				$removeFromCartQuery = mysqli_query($con, "DELETE FROM addtocart WHERE userId = '".$_SESSION['id']."' AND productId = '$productId'");
+				
+				if (!$insertOrderQuery || !$removeFromCartQuery) {
+					// Display error message
+					echo "<script>alert('Error: Unable to submit order. Please try again later.');</script>";
+					break;
+				}
+			}
+		} else {
+			// Display error message if cart is empty
+			echo "<script>alert('Your shopping cart is empty.');</script>";
+		}
 		mysqli_query($con,"update orders set 	paymentMethod='".$_POST['paymethod']."' where userId='".$_SESSION['id']."' and paymentMethod is null ");
 		unset($_SESSION['cart']);
 		header('location:ordercomplete.php');
